@@ -1,0 +1,218 @@
+// CampusFix - Campus Complaint & Maintenance Intelligence System
+// Complete Database Markup Language (DBML) Schema for dbdiagram.io
+// DBMS Experiential Learning - Level 3 Project
+
+Project CampusFix {
+  database_type: 'PostgreSQL'
+  Note: '''
+    # CampusFix Database
+    Campus Complaint Prioritization & Smart Routing System.
+    Includes relational core (12 tables) + pgvector semantic intelligence table.
+  '''
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+
+Enum role_type {
+  STUDENT
+  STAFF_USER
+  MAINTENANCE_STAFF
+  ADMIN
+}
+
+Enum complaint_status {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+Enum complaint_priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+Enum staff_availability {
+  AVAILABLE
+  BUSY
+  ON_LEAVE
+}
+
+// ----------------------------------------------------
+// TABLES
+// ----------------------------------------------------
+
+Table role {
+  role_id integer [pk, increment, note: 'Primary Key']
+  role_name varchar(50) [not null, unique, note: 'Unique role identifier (e.g., ADMIN, MAINTENANCE_STAFF, STUDENT)']
+  
+  Note: 'Defines user roles and system access boundaries'
+}
+
+Table app_user {
+  user_id integer [pk, increment, note: 'Primary Key']
+  full_name varchar(100) [not null, note: 'Full legal/campus name of user']
+  email varchar(255) [not null, unique, note: 'Institutional or registered email']
+  password_hash varchar(255) [not null, note: 'Bcrypt hashed password']
+  role_id integer [not null, note: 'Foreign Key referencing role']
+  created_at timestamp [not null, default: `now()`, note: 'Account creation timestamp']
+
+  Note: 'Core user entity representing students, faculty, staff, and administrators'
+}
+
+Table location {
+  location_id integer [pk, increment, note: 'Primary Key']
+  building varchar(100) [not null, note: 'Building / Block name']
+  floor varchar(20) [not null, note: 'Floor level (e.g., Ground, 1st, 2nd)']
+  room varchar(50) [not null, note: 'Room / Lab / Facility identifier']
+  zone varchar(100) [note: 'Campus geographical zone (e.g., North Wing, Academic Quad)']
+
+  Note: 'Normalized physical campus infrastructure hierarchy'
+}
+
+Table department {
+  department_id integer [pk, increment, note: 'Primary Key']
+  department_name varchar(100) [not null, unique, note: 'Department name (e.g., Electrical, Plumbing, IT Infrastructure)']
+  description text [note: 'Scope of department maintenance responsibility']
+
+  Note: 'Operational maintenance departments responsible for handling specific complaint domains'
+}
+
+Table category {
+  category_id integer [pk, increment, note: 'Primary Key']
+  category_name varchar(100) [not null, note: 'Category title (e.g., Fan/Light Repair, Wi-Fi Issue, Water Leakage)']
+  department_id integer [not null, note: 'Foreign Key referencing department']
+  default_sla_hours integer [not null, default: 24, note: 'Expected resolution SLA turnaround time in hours']
+
+  Note: 'Specific issue categories mapped to managing departments with default SLAs'
+}
+
+Table staff {
+  staff_id integer [pk, increment, note: 'Primary Key']
+  user_id integer [not null, unique, note: '1-to-1 Foreign Key referencing app_user']
+  specialization varchar(150) [not null, note: 'Technical trade or domain (e.g., HVAC, High Voltage, Network Cabling)']
+  availability_status staff_availability [not null, default: 'AVAILABLE', note: 'Current operational dispatch status']
+
+  Note: 'Specialized profile entity extending app_user for maintenance personnel'
+}
+
+Table complaint {
+  complaint_id integer [pk, increment, note: 'Primary Key']
+  title varchar(200) [not null, note: 'Concise summary of the reported maintenance issue']
+  description text [not null, note: 'Detailed description of the issue']
+  user_id integer [not null, note: 'Foreign Key referencing the reporting app_user']
+  category_id integer [not null, note: 'Foreign Key referencing the issue category']
+  location_id integer [not null, note: 'Foreign Key referencing the physical location']
+  status complaint_status [not null, default: 'OPEN', note: 'Lifecycle status']
+  priority complaint_priority [not null, default: 'MEDIUM', note: 'Assigned or algorithmically calculated priority']
+  created_at timestamp [not null, default: `now()`, note: 'Submission timestamp']
+  resolved_at timestamp [note: 'Timestamp when issue marked resolved (nullable)']
+  sla_due_at timestamp [note: 'Target SLA deadline computed from category default_sla_hours']
+
+  Note: 'Core transactional entity tracking maintenance complaints'
+}
+
+Table assignment {
+  assignment_id integer [pk, increment, note: 'Primary Key']
+  complaint_id integer [not null, note: 'Foreign Key referencing complaint']
+  staff_id integer [not null, note: 'Foreign Key referencing assigned maintenance staff']
+  assigned_at timestamp [not null, default: `now()`, note: 'Time of assignment']
+  assigned_by integer [not null, note: 'Foreign Key referencing admin user who dispatched the assignment']
+
+  Note: 'Dispatches complaints to specific maintenance personnel'
+}
+
+Table status_history {
+  history_id integer [pk, increment, note: 'Primary Key']
+  complaint_id integer [not null, note: 'Foreign Key referencing complaint']
+  old_status varchar(50) [note: 'Previous status before transition (null for initial submission)']
+  new_status varchar(50) [not null, note: 'New status after transition']
+  changed_by integer [note: 'Foreign Key referencing app_user who performed change (null if system trigger)']
+  remarks text [note: 'Reason, transition note, or work summary']
+  changed_at timestamp [not null, default: `now()`, note: 'Audit timestamp of transition']
+
+  Note: 'Append-only chronological audit trail of all complaint state changes'
+}
+
+Table attachment {
+  attachment_id integer [pk, increment, note: 'Primary Key']
+  complaint_id integer [not null, note: 'Foreign Key referencing complaint']
+  file_url varchar(500) [not null, note: 'Storage path or URL to evidence photo/document']
+  file_type varchar(50) [not null, note: 'MIME type (e.g., image/jpeg, image/png, application/pdf)']
+  uploaded_at timestamp [not null, default: `now()`, note: 'Upload timestamp']
+
+  Note: 'Visual or documentary proof attached to complaints'
+}
+
+Table comment {
+  comment_id integer [pk, increment, note: 'Primary Key']
+  complaint_id integer [not null, note: 'Foreign Key referencing complaint']
+  author_id integer [not null, note: 'Foreign Key referencing commenting app_user']
+  body text [not null, note: 'Message content']
+  created_at timestamp [not null, default: `now()`, note: 'Comment timestamp']
+
+  Note: 'Collaborative communication thread between reporters, staff, and admins'
+}
+
+Table audit_log {
+  log_id integer [pk, increment, note: 'Primary Key']
+  user_id integer [note: 'Foreign Key referencing acting app_user (nullable for automated system tasks)']
+  action varchar(100) [not null, note: 'Action performed (e.g., CREATE_COMPLAINT, ASSIGN_STAFF, ESCALATE)']
+  entity varchar(50) [not null, note: 'Affected target table/entity name']
+  entity_id varchar(50) [not null, note: 'Identifier of affected target entity']
+  created_at timestamp [not null, default: `now()`, note: 'Timestamp of the action']
+
+  Note: 'System-wide compliance and security audit log'
+}
+
+Table complaint_vector {
+  complaint_id integer [pk, note: 'Primary Key and Foreign Key referencing complaint (1-to-1)']
+  embedding "vector(384)" [not null, note: '384-dimensional embedding generated via sentence-transformers/all-MiniLM-L6-v2']
+
+  Note: 'Semantic vector representations stored with pgvector for duplicate detection and smart similarity routing'
+}
+
+// ----------------------------------------------------
+// RELATIONSHIPS
+// ----------------------------------------------------
+
+// Role & User
+Ref: app_user.role_id > role.role_id [delete: restrict]
+
+// Maintenance Staff 1-to-1 Subtype
+Ref: staff.user_id - app_user.user_id [delete: cascade]
+
+// Department & Category Hierarchy
+Ref: category.department_id > department.department_id [delete: restrict]
+
+// Complaint Associations
+Ref: complaint.user_id > app_user.user_id [delete: restrict]
+Ref: complaint.category_id > category.category_id [delete: restrict]
+Ref: complaint.location_id > location.location_id [delete: restrict]
+
+// Assignment
+Ref: assignment.complaint_id > complaint.complaint_id [delete: cascade]
+Ref: assignment.staff_id > staff.staff_id [delete: restrict]
+Ref: assignment.assigned_by > app_user.user_id [delete: restrict]
+
+// Complaint Status History
+Ref: status_history.complaint_id > complaint.complaint_id [delete: cascade]
+Ref: status_history.changed_by > app_user.user_id [delete: set null]
+
+// Attachments & Comments
+Ref: attachment.complaint_id > complaint.complaint_id [delete: cascade]
+Ref: comment.complaint_id > complaint.complaint_id [delete: cascade]
+Ref: comment.author_id > app_user.user_id [delete: restrict]
+
+// System Audit Log
+Ref: audit_log.user_id > app_user.user_id [delete: set null]
+
+// Vector Similarity Component (1-to-1)
+Ref: complaint_vector.complaint_id - complaint.complaint_id [delete: cascade]
+
