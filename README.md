@@ -108,3 +108,4 @@ Open your browser at **[http://localhost:3000](http://localhost:3000)**.
 ├── package.json                 # Next.js 14, pg, bcryptjs, jsonwebtoken, lucide-react
 └── README.md                    # Project documentation and evaluation guide
 ```
+

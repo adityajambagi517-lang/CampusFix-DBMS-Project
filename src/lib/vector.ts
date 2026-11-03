@@ -91,3 +91,4 @@ export function generateEmbedding(text: string): number[] {
 export function toPgVector(embedding: number[]): string {
   return `[${embedding.join(',')}]`;
 }
+

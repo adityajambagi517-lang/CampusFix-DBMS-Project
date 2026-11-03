@@ -43,3 +43,4 @@ export function getUserFromRequest(req: NextRequest): UserSession | null {
 
   return null;
 }
+

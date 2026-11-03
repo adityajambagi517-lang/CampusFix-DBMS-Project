@@ -32,3 +32,4 @@ export async function POST(
     return NextResponse.json({ error: error.message || 'Failed to post comment' }, { status: 500 });
   }
 }
+

@@ -332,3 +332,4 @@ JOIN app_user u ON s.user_id = u.user_id
 LEFT JOIN assignment a ON s.staff_id = a.staff_id
 LEFT JOIN complaint c ON a.complaint_id = c.complaint_id
 GROUP BY s.staff_id, u.user_id, u.full_name, u.email, s.specialization, s.availability_status;
+

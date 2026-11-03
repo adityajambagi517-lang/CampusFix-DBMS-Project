@@ -181,3 +181,4 @@ finally {
     $env:PGPASSWORD = $null
     Remove-Item env:PGPASSWORD -ErrorAction SilentlyContinue
 }
+
