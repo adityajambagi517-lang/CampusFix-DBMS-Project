@@ -53,3 +53,4 @@ docs/
     ├── 16_trigger_status_history.png
     └── 17_vector_cosine_sql_result.png
 ```
+

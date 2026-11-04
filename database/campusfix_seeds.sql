@@ -13,15 +13,15 @@ ON CONFLICT (role_name) DO NOTHING;
 -- 2. APP USERS
 -- Password for all demo accounts: Password@123
 INSERT INTO app_user (full_name, email, password_hash, role_id) VALUES
-('Campus Administrator', 'admin@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'ADMIN')),
-('Rajesh Kumar (Electrician)', 'rajesh.electrician@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'MAINTENANCE_STAFF')),
-('Suresh Patil (Plumber)', 'suresh.plumber@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'MAINTENANCE_STAFF')),
-('Anita Desai (Network Eng)', 'anita.network@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'MAINTENANCE_STAFF')),
-('Vikram Singh (Carpenter)', 'vikram.carpenter@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'MAINTENANCE_STAFF')),
-('Aditya Jambagi', 'aditya.student@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'STUDENT')),
-('Priya Sharma', 'priya.student@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'STUDENT')),
-('Rahul Verma', 'rahul.student@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'STUDENT')),
-('Dr. Ramesh Rao (HOD CS)', 'dr.ramesh@campusfix.edu', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', (SELECT role_id FROM role WHERE role_name = 'STAFF_USER'))
+('Campus Administrator', 'admin@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'ADMIN')),
+('Rajesh Kumar (Electrician)', 'rajesh.electrician@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'MAINTENANCE_STAFF')),
+('Suresh Patil (Plumber)', 'suresh.plumber@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'MAINTENANCE_STAFF')),
+('Anita Desai (Network Eng)', 'anita.network@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'MAINTENANCE_STAFF')),
+('Vikram Singh (Carpenter)', 'vikram.carpenter@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'MAINTENANCE_STAFF')),
+('Aditya Jambagi', 'aditya.student@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'STUDENT')),
+('Priya Sharma', 'priya.student@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'STUDENT')),
+('Rahul Verma', 'rahul.student@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'STUDENT')),
+('Dr. Ramesh Rao (HOD CS)', 'dr.ramesh@campusfix.edu', '.hlKnn5paaHMeJFihj76uo1Y3FcmWyayL4aR1d2dHKC.', (SELECT role_id FROM role WHERE role_name = 'STAFF_USER'))
 ON CONFLICT (email) DO NOTHING;
 
 -- 3. STAFF PROFILES (1-to-1 Subtype for MAINTENANCE_STAFF)

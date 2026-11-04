@@ -184,3 +184,4 @@ This document contains 50 comprehensive viva voce questions and precise answers 
 
 **Q50: What future enhancements can be added to CampusFix?**  
 **A:** Push notifications via WebSockets, mobile push alerts for field technicians, IoT sensor integration for automatic fault detection in power and water lines, and automated inventory tracking for replacement spare parts.
+

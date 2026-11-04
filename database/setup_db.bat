@@ -1,9 +1,19 @@
 @echo off
 title CampusFix Database Setup
+cd /d "%~dp0.."
 echo ============================================================
-echo   CampusFix - Launching PostgreSQL Automated Setup
+echo   CampusFix - Automated Database Setup (PostgreSQL 15)
 echo ============================================================
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup_db.ps1"
+echo.
+
+where python >nul 2>nul
+if %ERRORLEVEL% equ 0 (
+    python database\setup_db.py
+) else (
+    echo [ERROR] Python not found in PATH.
+    pause
+    exit /b 1
+)
+
 echo.
 pause
-

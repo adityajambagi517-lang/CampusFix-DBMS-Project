@@ -168,3 +168,4 @@
 
 ### `GET /api/master-data`
 - **Description**: Returns lists of departments, categories with SLA hours, campus locations, and technicians for UI dropdowns.
+

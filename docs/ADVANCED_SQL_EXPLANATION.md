@@ -417,3 +417,4 @@ LIMIT 3;
 ```
 - **Explanation**: Compares dense vectors using the cosine distance operator `<=>` accelerated by the HNSW index. Returns semantically similar tickets even when different vocabulary is used.
 - **Used by**: Real-time duplicate warning and Similar Complaints panel in `/complaints/[id]`.
+

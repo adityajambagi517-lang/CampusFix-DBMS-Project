@@ -62,3 +62,4 @@ CampusFix provides an end-to-end, intelligent maintenance routing and infrastruc
 3. **Automated State Tracking**: Use database triggers to automatically record every complaint transition into an immutable audit table (`status_history`) and dynamically compute SLA deadlines (`sla_due_at`).
 4. **Transactional Dispatch Operations**: Guarantee ACID properties during multi-table state mutations (dispatching technicians, updating availability, and logging audit events).
 5. **Operational Analytics**: Aggregate real-time campus maintenance metrics through database views to identify departmental bottlenecks and physical infrastructure hotspots.
+

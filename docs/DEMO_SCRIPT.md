@@ -87,3 +87,4 @@ This script outlines the exact live demonstration flow to present CampusFix to f
 
 ### Phase 6: Conclusion (30 Seconds)
 > *"In summary, CampusFix fulfills all DBMS Level 3 requirements: 13 normalized tables in 3NF, pgvector 384-D cosine similarity search, triggers, stored functions, relational views, ACID transactions, and a responsive Next.js application. Thank you, and we are ready for your questions."*
+

@@ -1,3 +1,9 @@
+# Database Data
+database/pgdata/
+database/.db_initialized
+database/__pycache__/
+*.log
+
 # Environment variables
 .env
 .env.local

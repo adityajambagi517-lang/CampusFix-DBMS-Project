@@ -70,11 +70,6 @@ BEGIN
             'Status transitioned from ' || OLD.status::text || ' to ' || NEW.status::text,
             CURRENT_TIMESTAMP
         );
-        
-        -- Automatically stamp resolved_at when marked RESOLVED or CLOSED
-        IF NEW.status IN ('RESOLVED', 'CLOSED') AND NEW.resolved_at IS NULL THEN
-            NEW.resolved_at := CURRENT_TIMESTAMP;
-        END IF;
     END IF;
     RETURN NEW;
 END;
@@ -82,9 +77,26 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trg_complaint_status_history ON complaint;
 CREATE TRIGGER trg_complaint_status_history
-    BEFORE INSERT OR UPDATE OF status ON complaint
+    AFTER INSERT OR UPDATE OF status ON complaint
     FOR EACH ROW
     EXECUTE FUNCTION fn_trg_record_status_history();
+
+-- Trigger Function 3: Automatically set resolved_at on transition to RESOLVED or CLOSED
+CREATE OR REPLACE FUNCTION fn_trg_set_resolved_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status IN ('RESOLVED', 'CLOSED') AND NEW.resolved_at IS NULL THEN
+        NEW.resolved_at := CURRENT_TIMESTAMP;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_set_resolved_at ON complaint;
+CREATE TRIGGER trg_set_resolved_at
+    BEFORE UPDATE OF status ON complaint
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_trg_set_resolved_at();
 
 -- ----------------------------------------------------------------------------
 -- 2. TRANSACTIONAL STORED PROCEDURES / FUNCTIONS

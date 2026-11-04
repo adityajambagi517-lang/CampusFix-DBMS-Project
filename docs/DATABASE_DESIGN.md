@@ -88,3 +88,4 @@ Campus complaints are filed in natural language text (e.g., *"The overhead fan i
   - `idx_complaint_created_at` on `complaint(created_at DESC)`
 - **Vector Search Index**:
   - `idx_complaint_vector_hnsw` on `complaint_vector(embedding vector_cosine_ops)` using **HNSW (Hierarchical Navigable Small World)** with parameters `m = 16`, `ef_construction = 64`. Provides logarithmic $O(\log N)$ nearest-neighbor query performance.
+

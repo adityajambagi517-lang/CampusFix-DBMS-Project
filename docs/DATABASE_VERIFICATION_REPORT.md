@@ -57,3 +57,4 @@ SELECT extname, extversion FROM pg_extension WHERE extname = 'vector';
 
 ### D. Vector Index Active
 - `idx_complaint_vector_hnsw` on `complaint_vector USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64)`.
+

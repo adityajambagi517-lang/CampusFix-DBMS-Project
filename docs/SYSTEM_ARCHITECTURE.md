@@ -90,3 +90,4 @@ In alignment with production database security principles:
 - **`postgres` superuser** is used strictly during administrative bootstrapping (creating the database, installing `pgvector`, and running schema migrations).
 - **`campusfix_app` application role** is provisioned with constrained privileges (`SELECT`, `INSERT`, `UPDATE`, `DELETE`, `EXECUTE`) on schema objects.
 - The web application connects solely using `campusfix_app`, ensuring the superuser credentials are never exposed to the web runtime or application configuration files.
+

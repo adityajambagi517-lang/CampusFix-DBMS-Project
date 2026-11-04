@@ -73,3 +73,4 @@
   - JWT tokens stored in HTTP-Only cookies.
   - `.env` excluded from version control via `.gitignore`.
   - No database passwords hardcoded in source code.
+

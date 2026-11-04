@@ -137,3 +137,4 @@ The schema is normalized to **Third Normal Form (3NF)**:
 - **Push Notifications**: Future iterations can integrate WebSockets or SMS/Email alerts for real-time status updates.
 - **Automated IoT Sensors**: Direct telemetry ingestion from campus electricity meters and water flow sensors to auto-generate tickets.
 - **Inventory Integration**: Linking equipment replacement to campus spare-parts inventory.
+
