@@ -16,6 +16,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { Complaint } from '@/types';
+import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PriorityBadge } from '@/components/ui/PriorityBadge';
@@ -59,6 +60,14 @@ export default function StaffDashboard() {
       });
 
       if (res.ok) {
+        if (newStatus === 'RESOLVED') {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.8 },
+            colors: ['#10b981', '#38bdf8', '#6366f1']
+          });
+        }
         setResolveModalId(null);
         setResolutionRemarks('');
         loadTasks();

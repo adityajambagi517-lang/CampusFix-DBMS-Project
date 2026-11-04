@@ -14,13 +14,14 @@ import {
   Layers,
   Activity,
   X,
-  PlusCircle
+  PlusCircle,
+  Compass
 } from 'lucide-react';
 import { Complaint, LocationHotspot } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
+import Campus3DViewer from '@/components/campus/Campus3DViewer';
 
 interface BuildingGroup {
   buildingName: string;
@@ -100,6 +101,11 @@ export default function CampusMapPage() {
     return Array.from(map.values());
   }, [locations, complaints]);
 
+  const handleSelectFrom3D = (buildingName: string) => {
+    const group = buildingGroups.find((b) => b.buildingName === buildingName);
+    if (group) setSelectedBuilding(group);
+  };
+
   return (
     <div className="space-y-8 pb-16">
       
@@ -108,14 +114,14 @@ export default function CampusMapPage() {
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/20 mb-2">
             <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-            <span>Campus Infrastructure Spatial Telemetry</span>
+            <span>Interactive 3D Digital Twin</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
             <MapPin className="w-6 h-6 text-brand-400" />
             <span>Campus Infrastructure Map</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Real-time status beacons mapped directly to PostgreSQL <code className="text-brand-300 font-mono">location</code> and <code className="text-brand-300 font-mono">vw_location_hotspots</code>.
+            Real 3D campus visualization mapped directly to PostgreSQL <code className="text-brand-300 font-mono">location</code> and <code className="text-brand-300 font-mono">vw_location_hotspots</code>.
           </p>
         </div>
 
@@ -126,111 +132,117 @@ export default function CampusMapPage() {
         </Link>
       </div>
 
-      {/* Status Legend Strip */}
-      <div className="saas-card p-3.5 flex flex-wrap items-center gap-5 text-xs text-slate-400">
-        <span className="font-semibold text-white">Facility Status Legend:</span>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-glow-emerald" />
-          <span>Operational (0 active orders)</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-          <span>Active Maintenance Work Orders</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-          <span>Critical Safety / Escalated</span>
-        </div>
+      {/* Real 3D Campus Digital Twin Environment */}
+      <div className="space-y-2">
+        <Campus3DViewer
+          locations={locations}
+          complaints={complaints}
+          hotspots={hotspots}
+          onSelectBuilding={handleSelectFrom3D}
+          selectedBuildingName={selectedBuilding?.buildingName}
+        />
       </div>
 
       {/* Building Cards Grid */}
-      {loading ? (
-        <div className="saas-card p-8">
-          <LoadingSkeleton lines={4} />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-brand-400" />
+            <span>Campus Facilities Directory</span>
+          </h2>
+          <span className="text-xs text-slate-400">Click any card or 3D building to inspect live work orders</span>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {buildingGroups.map((bld) => {
-            const hasCritical = bld.criticalIssues > 0;
-            const hasActive = bld.activeIssues > 0;
 
-            return (
-              <div
-                key={bld.buildingName}
-                onClick={() => setSelectedBuilding(bld)}
-                className="saas-card saas-card-interactive p-6 flex flex-col justify-between space-y-6"
-              >
-                {/* Top Info */}
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-400">
-                      <Building2 className="w-5 h-5" />
+        {loading ? (
+          <div className="saas-card p-8">
+            <LoadingSkeleton lines={4} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {buildingGroups.map((bld) => {
+              const hasCritical = bld.criticalIssues > 0;
+              const hasActive = bld.activeIssues > 0;
+
+              return (
+                <div
+                  key={bld.buildingName}
+                  onClick={() => setSelectedBuilding(bld)}
+                  className={`saas-card saas-card-interactive p-6 flex flex-col justify-between space-y-6 ${
+                    selectedBuilding?.buildingName === bld.buildingName ? 'border-brand-500 shadow-glow-primary' : ''
+                  }`}
+                >
+                  {/* Top Info */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-400">
+                        <Building2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-mono text-[10px] text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
+                          {bld.code}
+                        </span>
+                        <h3 className="text-base font-bold text-white mt-1">
+                          {bld.buildingName}
+                        </h3>
+                      </div>
                     </div>
+
+                    {/* Status Beacon */}
                     <div>
-                      <span className="font-mono text-[10px] text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
-                        {bld.code}
-                      </span>
-                      <h3 className="text-base font-bold text-white mt-1">
-                        {bld.buildingName}
-                      </h3>
+                      {hasCritical ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" /> Critical
+                        </span>
+                      ) : hasActive ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> {bld.activeIssues} Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Clear
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Status Beacon */}
-                  <div>
-                    {hasCritical ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" /> Critical
-                      </span>
-                    ) : hasActive ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> {bld.activeIssues} Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Clear
-                      </span>
-                    )}
+                  {/* Monitored Rooms */}
+                  <div className="space-y-2">
+                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      Monitored Zones & Rooms
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {bld.rooms.slice(0, 3).map((r, i) => (
+                        <span
+                          key={i}
+                          className="text-[11px] bg-white/5 text-slate-300 px-2.5 py-0.5 rounded-md border border-white/5"
+                        >
+                          {r}
+                        </span>
+                      ))}
+                      {bld.rooms.length > 3 && (
+                        <span className="text-[11px] text-slate-500 self-center">
+                          +{bld.rooms.length - 3} more
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Monitored Rooms */}
-                <div className="space-y-2">
-                  <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Monitored Zones & Rooms
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {bld.rooms.slice(0, 3).map((r, i) => (
-                      <span
-                        key={i}
-                        className="text-[11px] bg-white/5 text-slate-300 px-2.5 py-0.5 rounded-md border border-white/5"
-                      >
-                        {r}
-                      </span>
-                    ))}
-                    {bld.rooms.length > 3 && (
-                      <span className="text-[11px] text-slate-500 self-center">
-                        +{bld.rooms.length - 3} more
-                      </span>
-                    )}
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
+                    <div className="text-slate-400">
+                      Total Tickets: <strong className="text-white">{bld.complaints.length}</strong>
+                    </div>
+                    <div className="flex items-center gap-1 text-brand-400 font-semibold group-hover:translate-x-0.5 transition-transform">
+                      <span>Inspect Facility</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
                   </div>
                 </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
-                  <div className="text-slate-400">
-                    Total Tickets: <strong className="text-white">{bld.complaints.length}</strong>
-                  </div>
-                  <div className="flex items-center gap-1 text-brand-400 font-semibold group-hover:translate-x-0.5 transition-transform">
-                    <span>Inspect Facility</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Building Detail Modal */}
       <AnimatePresence>

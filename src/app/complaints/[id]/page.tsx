@@ -19,6 +19,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { Complaint, StatusHistoryItem, CommentItem, SimilarComplaint, UserSession } from '@/types';
+import confetti from 'canvas-confetti';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PriorityBadge } from '@/components/ui/PriorityBadge';
@@ -101,7 +102,17 @@ export default function ComplaintDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, remarks: `Status changed to ${newStatus}` }),
       });
-      if (res.ok) loadAll();
+      if (res.ok) {
+        if (newStatus === 'RESOLVED') {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.8 },
+            colors: ['#10b981', '#38bdf8', '#6366f1']
+          });
+        }
+        loadAll();
+      }
     } catch (err) {
       console.error(err);
     } finally {
