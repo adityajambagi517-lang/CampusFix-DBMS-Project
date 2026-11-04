@@ -92,3 +92,4 @@ export const BentoCard: React.FC<BentoCardProps> = ({
     </motion.div>
   );
 };
+

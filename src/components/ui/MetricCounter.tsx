@@ -55,3 +55,4 @@ export const MetricCounter: React.FC<MetricCounterProps> = ({
     </span>
   );
 };
+

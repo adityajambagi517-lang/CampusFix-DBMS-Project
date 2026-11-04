@@ -46,3 +46,4 @@ export const SimilarityBadge: React.FC<SimilarityBadgeProps> = ({
     </div>
   );
 };
+
