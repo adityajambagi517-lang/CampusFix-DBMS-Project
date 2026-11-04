@@ -17,9 +17,10 @@ import {
   PlusCircle
 } from 'lucide-react';
 import { Complaint, LocationHotspot } from '@/types';
-import { AmbientGlow } from '@/components/ui/AmbientGlow';
-import { TiltCard3D } from '@/components/ui/TiltCard3D';
-import { GlowButton } from '@/components/ui/GlowButton';
+import { Button } from '@/components/ui/Button';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 
 interface BuildingGroup {
   buildingName: string;
@@ -100,42 +101,41 @@ export default function CampusMapPage() {
   }, [locations, complaints]);
 
   return (
-    <div className="relative min-h-[calc(100vh-6rem)] space-y-8 py-6 pb-20">
-      <AmbientGlow variant="multi" />
-
+    <div className="space-y-8 pb-16">
+      
       {/* Header */}
-      <div className="relative z-10 glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="saas-card p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-300 border border-sky-400/30 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-            <span>Interactive Campus Facilities Grid</span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/20 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+            <span>Campus Infrastructure Spatial Telemetry</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <MapPin className="w-7 h-7 text-sky-400" />
+            <MapPin className="w-6 h-6 text-brand-400" />
             <span>Campus Infrastructure Map</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Real-time status beacons mapped directly to PostgreSQL <code className="text-sky-300 font-mono">location</code> and <code className="text-sky-300 font-mono">vw_location_hotspots</code>.
+            Real-time status beacons mapped directly to PostgreSQL <code className="text-brand-300 font-mono">location</code> and <code className="text-brand-300 font-mono">vw_location_hotspots</code>.
           </p>
         </div>
 
         <Link href="/dashboard/student">
-          <GlowButton variant="primary" size="md" icon={<PlusCircle className="w-4 h-4" />}>
+          <Button variant="primary" size="md" icon={<PlusCircle className="w-4 h-4" />}>
             Report Issue on Map
-          </GlowButton>
+          </Button>
         </Link>
       </div>
 
       {/* Status Legend Strip */}
-      <div className="relative z-10 flex flex-wrap items-center gap-4 text-xs text-slate-400 glass-panel p-3.5 rounded-2xl border border-white/10">
+      <div className="saas-card p-3.5 flex flex-wrap items-center gap-5 text-xs text-slate-400">
         <span className="font-semibold text-white">Facility Status Legend:</span>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-glow-emerald" />
-          <span>Operational (0 active issues)</span>
+          <span>Operational (0 active orders)</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-          <span>Active Maintenance Orders</span>
+          <span>Active Maintenance Work Orders</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
@@ -143,154 +143,147 @@ export default function CampusMapPage() {
         </div>
       </div>
 
-      {/* 3D Interactive Building Cards */}
+      {/* Building Cards Grid */}
       {loading ? (
-        <div className="relative z-10 glass-panel rounded-3xl p-14 text-center text-slate-400">
-          Loading campus infrastructure spatial data...
+        <div className="saas-card p-8">
+          <LoadingSkeleton lines={4} />
         </div>
       ) : (
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {buildingGroups.map((bld) => {
             const hasCritical = bld.criticalIssues > 0;
             const hasActive = bld.activeIssues > 0;
-            const statusColor = hasCritical
-              ? 'rgba(244, 63, 94, 0.3)'
-              : hasActive
-              ? 'rgba(245, 158, 11, 0.3)'
-              : 'rgba(16, 185, 129, 0.25)';
 
             return (
-              <TiltCard3D
+              <div
                 key={bld.buildingName}
-                glowColor={statusColor}
                 onClick={() => setSelectedBuilding(bld)}
+                className="saas-card saas-card-interactive p-6 flex flex-col justify-between space-y-6"
               >
-                <div className="p-6 h-full flex flex-col justify-between space-y-6">
-                  {/* Top Bar */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-800/80 border border-white/10 flex items-center justify-center text-sky-400">
-                        <Building2 className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <span className="font-mono text-[10px] text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
-                          {bld.code}
-                        </span>
-                        <h3 className="text-base font-bold text-white mt-1 group-hover:text-sky-300">
-                          {bld.buildingName}
-                        </h3>
-                      </div>
+                {/* Top Info */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-brand-400">
+                      <Building2 className="w-5 h-5" />
                     </div>
-
-                    {/* Status Beacon */}
                     <div>
-                      {hasCritical ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">
-                          <span className="w-2 h-2 rounded-full bg-rose-400" /> Critical
-                        </span>
-                      ) : hasActive ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                          <span className="w-2 h-2 rounded-full bg-amber-400" /> {bld.activeIssues} Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400" /> Clear
-                        </span>
-                      )}
+                      <span className="font-mono text-[10px] text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
+                        {bld.code}
+                      </span>
+                      <h3 className="text-base font-bold text-white mt-1">
+                        {bld.buildingName}
+                      </h3>
                     </div>
                   </div>
 
-                  {/* Rooms covered */}
-                  <div className="space-y-2">
-                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                      Monitored Rooms & Zones
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {bld.rooms.slice(0, 3).map((r, i) => (
-                        <span
-                          key={i}
-                          className="text-[11px] bg-slate-900/80 text-slate-300 px-2 py-0.5 rounded-lg border border-white/5"
-                        >
-                          {r}
-                        </span>
-                      ))}
-                      {bld.rooms.length > 3 && (
-                        <span className="text-[11px] text-slate-400 self-center">
-                          +{bld.rooms.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bottom Stats Footer */}
-                  <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
-                    <div className="text-slate-400">
-                      Total Tickets: <strong className="text-white">{bld.complaints.length}</strong>
-                    </div>
-                    <div className="flex items-center gap-1 text-sky-400 font-semibold group-hover:translate-x-1 transition-transform">
-                      <span>Inspect Facility</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </div>
+                  {/* Status Beacon */}
+                  <div>
+                    {hasCritical ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" /> Critical
+                      </span>
+                    ) : hasActive ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> {bld.activeIssues} Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Clear
+                      </span>
+                    )}
                   </div>
                 </div>
-              </TiltCard3D>
+
+                {/* Monitored Rooms */}
+                <div className="space-y-2">
+                  <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                    Monitored Zones & Rooms
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {bld.rooms.slice(0, 3).map((r, i) => (
+                      <span
+                        key={i}
+                        className="text-[11px] bg-white/5 text-slate-300 px-2.5 py-0.5 rounded-md border border-white/5"
+                      >
+                        {r}
+                      </span>
+                    ))}
+                    {bld.rooms.length > 3 && (
+                      <span className="text-[11px] text-slate-500 self-center">
+                        +{bld.rooms.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs">
+                  <div className="text-slate-400">
+                    Total Tickets: <strong className="text-white">{bld.complaints.length}</strong>
+                  </div>
+                  <div className="flex items-center gap-1 text-brand-400 font-semibold group-hover:translate-x-0.5 transition-transform">
+                    <span>Inspect Facility</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </div>
             );
           })}
         </div>
       )}
 
-      {/* Building Detail Modal (Animmaster Spring Slide) */}
+      {/* Building Detail Modal */}
       <AnimatePresence>
         {selectedBuilding && (
-          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="glass-panel rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-white/10 space-y-6 max-h-[85vh] overflow-y-auto"
+              exit={{ opacity: 0, scale: 0.96 }}
+              className="saas-card max-w-2xl w-full p-6 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto border border-white/10 shadow-2xl"
             >
               <div className="flex items-start justify-between border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-500/30">
+                  <div className="w-10 h-10 rounded-xl bg-brand-500/15 text-brand-400 flex items-center justify-center border border-brand-500/25">
                     <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">{selectedBuilding.buildingName}</h2>
+                    <h2 className="text-lg font-bold text-white">{selectedBuilding.buildingName}</h2>
                     <span className="text-xs text-slate-400 font-mono">
-                      {selectedBuilding.totalLocations} Managed Rooms · {selectedBuilding.activeIssues} Active Work Orders
+                      {selectedBuilding.totalLocations} Monitored Rooms · {selectedBuilding.activeIssues} Active Work Orders
                     </span>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedBuilding(null)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Rooms in building */}
+              {/* Facility Zones */}
               <div className="space-y-2">
                 <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
                   Facility Zones
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {selectedBuilding.rooms.map((r, i) => (
-                    <div key={i} className="p-2.5 rounded-xl bg-slate-900/70 border border-white/5 text-xs text-slate-300 flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-sky-400" />
+                    <div key={i} className="p-2.5 rounded-lg bg-white/5 border border-white/5 text-xs text-slate-300 flex items-center gap-2">
+                      <MapPin className="w-3.5 h-3.5 text-brand-400" />
                       <span>{r}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Complaints associated with this building */}
+              {/* Associated Complaints */}
               <div className="space-y-3">
                 <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                  Associated Complaints ({selectedBuilding.complaints.length})
+                  Facility Tickets ({selectedBuilding.complaints.length})
                 </h4>
                 {selectedBuilding.complaints.length === 0 ? (
-                  <div className="p-6 rounded-2xl bg-slate-900/50 border border-white/5 text-center text-xs text-slate-400">
+                  <div className="p-6 rounded-xl bg-white/5 border border-white/5 text-center text-xs text-slate-400">
                     No complaints registered for this building.
                   </div>
                 ) : (
@@ -298,22 +291,25 @@ export default function CampusMapPage() {
                     {selectedBuilding.complaints.map((c) => (
                       <div
                         key={c.complaint_id}
-                        className="p-3.5 rounded-2xl bg-slate-900/70 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                        className="p-3.5 rounded-xl bg-white/5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                       >
                         <div className="space-y-0.5">
-                          <div className="text-xs font-bold text-white flex items-center gap-2">
-                            <span>#{c.complaint_id}</span>
+                          <div className="text-xs font-semibold text-white flex items-center gap-2">
+                            <span className="font-mono text-slate-400">#{c.complaint_id}</span>
                             <span>{c.title}</span>
                           </div>
                           <div className="text-[11px] text-slate-400">
-                            {c.room} · {c.category_name} · Status: <span className="font-semibold text-sky-300">{c.status}</span>
+                            {c.room} · {c.category_name}
                           </div>
                         </div>
-                        <Link href={`/complaints/${c.complaint_id}`}>
-                          <GlowButton variant="secondary" size="sm" icon={<ArrowRight className="w-3 h-3" />}>
-                            View
-                          </GlowButton>
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={c.status} />
+                          <Link href={`/complaints/${c.complaint_id}`}>
+                            <Button variant="secondary" size="sm" icon={<ArrowRight className="w-3 h-3" />}>
+                              View
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -321,28 +317,28 @@ export default function CampusMapPage() {
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <GlowButton
+                <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedBuilding(null)}
                 >
                   Close
-                </GlowButton>
+                </Button>
                 <Link href="/dashboard/student">
-                  <GlowButton
+                  <Button
                     variant="primary"
                     size="sm"
                     icon={<PlusCircle className="w-4 h-4" />}
                   >
                     Report Issue Here
-                  </GlowButton>
+                  </Button>
                 </Link>
               </div>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }
-

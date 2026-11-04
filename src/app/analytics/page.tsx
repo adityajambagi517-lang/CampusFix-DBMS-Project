@@ -19,9 +19,9 @@ import {
   Sparkles
 } from 'lucide-react';
 import { DepartmentWorkload, LocationHotspot, StaffMetric } from '@/types';
-import { AmbientGlow } from '@/components/ui/AmbientGlow';
-import { GlowButton } from '@/components/ui/GlowButton';
+import { Button } from '@/components/ui/Button';
 import { MetricCounter } from '@/components/ui/MetricCounter';
+import { TableSkeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function AnalyticsPage() {
   const [deptWorkload, setDeptWorkload] = useState<DepartmentWorkload[]>([]);
@@ -45,48 +45,47 @@ export default function AnalyticsPage() {
   }, []);
 
   return (
-    <div className="relative min-h-[calc(100vh-6rem)] space-y-8 py-6 pb-20">
-      <AmbientGlow variant="multi" />
-
+    <div className="space-y-8 pb-16">
+      
       {/* Top Header */}
-      <div className="relative z-10 glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="saas-card p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 text-xs font-bold text-sky-300 bg-sky-500/15 border border-sky-400/30 px-3 py-1 rounded-full mb-2">
-            <Database className="w-3.5 h-3.5 text-sky-400" />
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-300 bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 rounded-full mb-2">
+            <Database className="w-3.5 h-3.5 text-brand-400" />
             <span>PostgreSQL 15 Operational Views</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Campus Maintenance Intelligence
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Aggregated cross-table analytics via <code className="text-sky-300 font-mono">vw_department_workload</code>, <code className="text-sky-300 font-mono">vw_location_hotspots</code>, and <code className="text-sky-300 font-mono">vw_staff_metrics</code>.
+            Aggregated relational analytics via <code className="text-brand-300 font-mono">vw_department_workload</code>, <code className="text-brand-300 font-mono">vw_location_hotspots</code>, and <code className="text-brand-300 font-mono">vw_staff_metrics</code>.
           </p>
         </div>
 
         <Link href="/">
-          <GlowButton variant="secondary" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>
+          <Button variant="secondary" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>
             Home Overview
-          </GlowButton>
+          </Button>
         </Link>
       </div>
 
       {loading ? (
-        <div className="relative z-10 glass-panel rounded-3xl p-14 text-center text-slate-400">
-          Querying PostgreSQL database views...
+        <div className="saas-card p-8">
+          <TableSkeleton rows={4} />
         </div>
       ) : (
-        <div className="relative z-10 space-y-8">
-          {/* Status Breakdown Chips (Skiper UI Horizontal Rail) */}
-          <div className="glass-panel rounded-3xl p-6 border border-white/10 shadow-xl space-y-4">
-            <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <Activity className="w-4 h-4 text-sky-400" />
+        <div className="space-y-8">
+          {/* Status Breakdown Chips */}
+          <div className="saas-card p-6 space-y-4">
+            <h2 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <Activity className="w-4 h-4 text-brand-400" />
               <span>Lifecycle State Distribution</span>
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {statusDist.map((item) => (
-                <div key={item.status} className="p-4 rounded-2xl border border-white/5 bg-slate-900/60 text-center hover:border-sky-500/30 transition-colors">
-                  <div className="text-[11px] font-bold text-slate-400 uppercase">{item.status}</div>
-                  <div className="text-2xl font-black text-white mt-1">
+                <div key={item.status} className="p-4 rounded-xl border border-white/5 bg-white/5 text-center">
+                  <div className="text-[11px] font-medium text-slate-400 uppercase">{item.status}</div>
+                  <div className="text-2xl font-bold text-white mt-1">
                     <MetricCounter value={item.count} />
                   </div>
                   <div className="text-[10px] text-slate-500 font-mono mt-0.5">{item.percentage}% of total</div>
@@ -96,12 +95,12 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 p-1.5 rounded-2xl glass-panel border border-white/10 w-fit">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10 w-fit">
             <button
               onClick={() => setActiveTab('workload')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 activeTab === 'workload'
-                  ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30 shadow-sm'
+                  ? 'bg-brand-500/20 text-brand-300 border border-brand-500/30 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -109,9 +108,9 @@ export default function AnalyticsPage() {
             </button>
             <button
               onClick={() => setActiveTab('hotspots')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 activeTab === 'hotspots'
-                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 shadow-sm'
+                  ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -119,9 +118,9 @@ export default function AnalyticsPage() {
             </button>
             <button
               onClick={() => setActiveTab('staff')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 activeTab === 'staff'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow-sm'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -129,9 +128,9 @@ export default function AnalyticsPage() {
             </button>
             <button
               onClick={() => setActiveTab('sql')}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 activeTab === 'sql'
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30 shadow-sm'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -142,46 +141,44 @@ export default function AnalyticsPage() {
           {/* View 1: Department Workload View */}
           {activeTab === 'workload' && (
             <motion.div
-              initial={{ opacity: 0, y: 5 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-panel rounded-3xl border border-white/10 shadow-xl overflow-hidden space-y-4 p-6"
+              className="saas-card overflow-hidden space-y-4 p-6"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-bold text-white flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-sky-400" />
-                    <span>Department Workload & SLA Performance</span>
-                  </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Live SQL View: <span className="font-mono text-sky-300">vw_department_workload</span>
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-brand-400" />
+                  <span>Department Workload & SLA Performance</span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Live PostgreSQL View: <span className="font-mono text-brand-300">vw_department_workload</span>
+                </p>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-900/80 border-b border-white/10 text-slate-400 uppercase font-semibold">
-                      <th className="py-3.5 px-4">Department</th>
-                      <th className="py-3.5 px-4 text-center">Total Complaints</th>
-                      <th className="py-3.5 px-4 text-center">Open</th>
-                      <th className="py-3.5 px-4 text-center">In Progress</th>
-                      <th className="py-3.5 px-4 text-center">Resolved</th>
-                      <th className="py-3.5 px-4 text-center">SLA Breached</th>
-                      <th className="py-3.5 px-4 text-right">Avg Resolution Time</th>
+                    <tr className="bg-white/5 border-b border-white/10 text-slate-400 uppercase font-semibold">
+                      <th className="py-3 px-4">Department</th>
+                      <th className="py-3 px-4 text-center">Total Complaints</th>
+                      <th className="py-3 px-4 text-center">Open</th>
+                      <th className="py-3 px-4 text-center">In Progress</th>
+                      <th className="py-3 px-4 text-center">Resolved</th>
+                      <th className="py-3 px-4 text-center">SLA Breached</th>
+                      <th className="py-3 px-4 text-right">Avg Resolution Time</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {deptWorkload.map((d) => (
                       <tr key={d.department_id} className="hover:bg-white/[0.02]">
-                        <td className="py-3.5 px-4 font-bold text-white">{d.department_name}</td>
+                        <td className="py-3.5 px-4 font-semibold text-white">{d.department_name}</td>
                         <td className="py-3.5 px-4 text-center font-bold text-slate-200">{d.total_complaints}</td>
                         <td className="py-3.5 px-4 text-center text-sky-300 font-semibold">{d.open_count}</td>
                         <td className="py-3.5 px-4 text-center text-amber-300 font-semibold">{d.in_progress_count}</td>
                         <td className="py-3.5 px-4 text-center text-emerald-300 font-semibold">{d.resolved_count}</td>
                         <td className="py-3.5 px-4 text-center">
-                          <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${
-                            Number(d.sla_breached_count) > 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' : 'bg-slate-800 text-slate-500'
+                          <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                            Number(d.sla_breached_count) > 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' : 'bg-white/5 text-slate-500'
                           }`}>
                             {d.sla_breached_count}
                           </span>
@@ -200,13 +197,13 @@ export default function AnalyticsPage() {
           {/* View 2: Location Hotspots View */}
           {activeTab === 'hotspots' && (
             <motion.div
-              initial={{ opacity: 0, y: 5 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-panel rounded-3xl border border-white/10 shadow-xl p-6 space-y-4"
+              className="saas-card p-6 space-y-4"
             >
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-rose-400" />
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-rose-400" />
                   <span>Infrastructure Maintenance Hotspots</span>
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -217,11 +214,11 @@ export default function AnalyticsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-900/80 border-b border-white/10 text-slate-400 uppercase font-semibold">
-                      <th className="py-3.5 px-4">Location</th>
-                      <th className="py-3.5 px-4 text-center">Total</th>
-                      <th className="py-3.5 px-4 text-center">Active</th>
-                      <th className="py-3.5 px-4 text-center">Critical</th>
+                    <tr className="bg-white/5 border-b border-white/10 text-slate-400 uppercase font-semibold">
+                      <th className="py-3 px-4">Location</th>
+                      <th className="py-3 px-4 text-center">Total</th>
+                      <th className="py-3 px-4 text-center">Active</th>
+                      <th className="py-3 px-4 text-center">Critical</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
@@ -245,13 +242,13 @@ export default function AnalyticsPage() {
           {/* View 3: Staff Performance Metrics */}
           {activeTab === 'staff' && (
             <motion.div
-              initial={{ opacity: 0, y: 5 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-panel rounded-3xl border border-white/10 shadow-xl p-6 space-y-4"
+              className="saas-card p-6 space-y-4"
             >
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Wrench className="w-5 h-5 text-amber-400" />
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Wrench className="w-4 h-4 text-amber-400" />
                   <span>Maintenance Staff Throughput</span>
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -262,19 +259,19 @@ export default function AnalyticsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-900/80 border-b border-white/10 text-slate-400 uppercase font-semibold">
-                      <th className="py-3.5 px-4">Technician</th>
-                      <th className="py-3.5 px-4">Status</th>
-                      <th className="py-3.5 px-4 text-center">Assigned</th>
-                      <th className="py-3.5 px-4 text-center">Resolved</th>
-                      <th className="py-3.5 px-4 text-right">Avg Turnaround</th>
+                    <tr className="bg-white/5 border-b border-white/10 text-slate-400 uppercase font-semibold">
+                      <th className="py-3 px-4">Technician</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-center">Assigned</th>
+                      <th className="py-3 px-4 text-center">Resolved</th>
+                      <th className="py-3 px-4 text-right">Avg Turnaround</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {staffMetrics.map((s) => (
                       <tr key={s.staff_id} className="hover:bg-white/[0.02]">
                         <td className="py-3.5 px-4">
-                          <div className="font-bold text-white">{s.staff_name}</div>
+                          <div className="font-semibold text-white">{s.staff_name}</div>
                           <div className="text-[10px] text-slate-400">{s.specialization}</div>
                         </td>
                         <td className="py-3.5 px-4">
@@ -300,16 +297,16 @@ export default function AnalyticsPage() {
           {/* View 4: Live SQL Definitions Inspector */}
           {activeTab === 'sql' && (
             <motion.div
-              initial={{ opacity: 0, y: 5 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               className="space-y-4"
             >
-              <div className="glass-panel rounded-3xl p-6 border border-white/10 shadow-xl space-y-3">
+              <div className="saas-card p-6 space-y-3">
                 <div className="flex items-center gap-2 text-purple-300 font-mono text-xs font-bold">
                   <Code2 className="w-4 h-4" />
                   <span>vw_department_workload</span>
                 </div>
-                <pre className="p-4 rounded-2xl bg-slate-900/90 border border-white/5 text-xs text-slate-300 overflow-x-auto font-mono">
+                <pre className="p-4 rounded-xl bg-black/40 border border-white/5 text-xs text-slate-300 overflow-x-auto font-mono">
 {`CREATE OR REPLACE VIEW vw_department_workload AS
 SELECT 
     d.department_id,
@@ -330,12 +327,12 @@ GROUP BY d.department_id, d.department_name;`}
                 </pre>
               </div>
 
-              <div className="glass-panel rounded-3xl p-6 border border-white/10 shadow-xl space-y-3">
+              <div className="saas-card p-6 space-y-3">
                 <div className="flex items-center gap-2 text-rose-300 font-mono text-xs font-bold">
                   <Code2 className="w-4 h-4" />
                   <span>vw_location_hotspots</span>
                 </div>
-                <pre className="p-4 rounded-2xl bg-slate-900/90 border border-white/5 text-xs text-slate-300 overflow-x-auto font-mono">
+                <pre className="p-4 rounded-xl bg-black/40 border border-white/5 text-xs text-slate-300 overflow-x-auto font-mono">
 {`CREATE OR REPLACE VIEW vw_location_hotspots AS
 SELECT 
     l.location_id,
@@ -356,6 +353,7 @@ ORDER BY total_complaints DESC;`}
           )}
         </div>
       )}
+
     </div>
   );
 }

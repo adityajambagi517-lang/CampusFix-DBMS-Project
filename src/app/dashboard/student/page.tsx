@@ -14,13 +14,16 @@ import {
   FileText,
   AlertTriangle,
   X,
-  Shield,
-  Activity
+  Search,
+  Filter
 } from 'lucide-react';
 import { Complaint, SimilarComplaint } from '@/types';
-import { AmbientGlow } from '@/components/ui/AmbientGlow';
-import { GlowButton } from '@/components/ui/GlowButton';
+import { Button } from '@/components/ui/Button';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { PriorityBadge } from '@/components/ui/PriorityBadge';
 import { SimilarityBadge } from '@/components/ui/SimilarityBadge';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function StudentDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -40,6 +43,9 @@ export default function StudentDashboard() {
   // Vector Similarity Detection State
   const [similarWarnings, setSimilarWarnings] = useState<SimilarComplaint[]>([]);
   const [checkingSimilarity, setCheckingSimilarity] = useState(false);
+
+  // Search filter
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadData();
@@ -89,7 +95,7 @@ export default function StudentDashboard() {
           setCheckingSimilarity(false);
         }
       }
-    }, 500);
+    }, 450);
 
     return () => clearTimeout(timer);
   }, [title, description]);
@@ -131,105 +137,86 @@ export default function StudentDashboard() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'OPEN':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30">Open</span>;
-      case 'ASSIGNED':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/30">Assigned</span>;
-      case 'IN_PROGRESS':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">In Progress</span>;
-      case 'RESOLVED':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Resolved</span>;
-      case 'ESCALATED':
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">Escalated</span>;
-      default:
-        return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-white/10">Closed</span>;
-    }
-  };
+  const filteredComplaints = complaints.filter((c) => {
+    if (!searchTerm) return true;
+    const q = searchTerm.toLowerCase();
+    return (
+      c.title.toLowerCase().includes(q) ||
+      c.description.toLowerCase().includes(q) ||
+      c.building.toLowerCase().includes(q) ||
+      c.room.toLowerCase().includes(q) ||
+      c.category_name.toLowerCase().includes(q)
+    );
+  });
 
-  const getPriorityBadge = (p: string) => {
-    switch (p) {
-      case 'CRITICAL':
-        return <span className="text-[11px] font-bold text-rose-300 bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 rounded">Critical</span>;
-      case 'HIGH':
-        return <span className="text-[11px] font-semibold text-orange-300 bg-orange-500/15 border border-orange-500/30 px-2 py-0.5 rounded">High</span>;
-      case 'MEDIUM':
-        return <span className="text-[11px] font-semibold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded">Medium</span>;
-      default:
-        return <span className="text-[11px] font-medium text-slate-300 bg-slate-800 border border-white/10 px-2 py-0.5 rounded">Low</span>;
-    }
-  };
-
-  const openTickets = complaints.filter(c => c.status !== 'RESOLVED' && c.status !== 'CLOSED').length;
-  const resolvedTickets = complaints.filter(c => c.status === 'RESOLVED').length;
+  const openTickets = complaints.filter((c) => c.status !== 'RESOLVED' && c.status !== 'CLOSED').length;
+  const resolvedTickets = complaints.filter((c) => c.status === 'RESOLVED').length;
 
   return (
-    <div className="relative min-h-[calc(100vh-6rem)] space-y-8 py-6 pb-20">
-      <AmbientGlow variant="cyber" />
-
-      {/* Header & Skiper UI Summary Strip */}
-      <div className="relative z-10 glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
+    <div className="space-y-8 pb-16">
+      
+      {/* Header & KPI Summary Strip */}
+      <div className="saas-card p-6 sm:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-300 border border-sky-400/30 mb-2">
-              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-300 border border-brand-500/20 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-brand-400" />
               <span>Campus User Workstation</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Student & Faculty Dashboard
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              File maintenance tickets, monitor active SLA stages, and preview AI duplicate warnings.
+              File facility complaints, track real-time resolution stages, and inspect pgvector duplicate warnings.
             </p>
           </div>
 
-          <GlowButton
-            variant={showForm ? 'secondary' : 'primary'}
+          <Button
+            variant={showForm ? 'outline' : 'primary'}
             size="md"
             onClick={() => setShowForm(!showForm)}
             icon={showForm ? <X className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
           >
-            {showForm ? 'Close Form' : 'File Complaint'}
-          </GlowButton>
+            {showForm ? 'Cancel Form' : 'Log Maintenance Request'}
+          </Button>
         </div>
 
-        {/* Skiper UI KPI Quick Strip */}
+        {/* Quick KPI Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/10">
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+          <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
             <span className="text-xs text-slate-400">Total Submitted</span>
             <div className="text-2xl font-bold text-white tabular-nums">{complaints.length}</div>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
-            <span className="text-xs text-amber-400">Pending Resolution</span>
+          <div className="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/15 space-y-1">
+            <span className="text-xs text-amber-400">In Active Progress</span>
             <div className="text-2xl font-bold text-amber-300 tabular-nums">{openTickets}</div>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+          <div className="p-3.5 rounded-xl bg-emerald-500/5 border border-emerald-500/15 space-y-1">
             <span className="text-xs text-emerald-400">Resolved Successfully</span>
             <div className="text-2xl font-bold text-emerald-300 tabular-nums">{resolvedTickets}</div>
           </div>
-          <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+          <div className="p-3.5 rounded-xl bg-sky-500/5 border border-sky-500/15 space-y-1">
             <span className="text-xs text-sky-400">Vector AI Guard</span>
-            <div className="text-xs font-mono font-semibold text-sky-300 pt-1">384-D Active</div>
+            <div className="text-xs font-mono font-semibold text-sky-300 pt-1">384-D Deduplication</div>
           </div>
         </div>
       </div>
 
-      {/* Submission Form (Animmaster Spring Slide) */}
+      {/* Complaint Submission Form */}
       <AnimatePresence>
         {showForm && (
           <motion.div
-            initial={{ opacity: 0, y: -20, height: 0 }}
+            initial={{ opacity: 0, y: -10, height: 0 }}
             animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -20, height: 0 }}
-            className="relative z-10 glass-panel rounded-3xl border border-sky-500/30 shadow-2xl p-6 sm:p-8 space-y-6 overflow-hidden"
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            className="saas-card p-6 sm:p-8 space-y-6 overflow-hidden border-brand-500/30"
           >
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-sky-400" />
-                <h2 className="text-lg font-bold text-white">Log Maintenance Request</h2>
+                <FileText className="w-5 h-5 text-brand-400" />
+                <h2 className="text-base font-bold text-white">Log Maintenance Request</h2>
               </div>
-              <span className="text-xs font-mono text-sky-300 bg-sky-500/15 border border-sky-500/30 px-2.5 py-1 rounded-full">
+              <span className="text-xs font-mono text-brand-300 bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 rounded-full">
                 pgvector cosine check active
               </span>
             </div>
@@ -237,14 +224,14 @@ export default function StudentDashboard() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
+                  <label className="block text-xs font-medium text-slate-300">
                     Infrastructure Category
                   </label>
                   <select
                     required
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm bg-slate-900/80 border border-white/10 rounded-xl text-white focus:outline-none focus:border-sky-400 transition-colors"
+                    className="w-full px-3.5 py-2.5 text-xs saas-input"
                   >
                     <option value="">Select category...</option>
                     {categories.map((cat) => (
@@ -256,14 +243,14 @@ export default function StudentDashboard() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
+                  <label className="block text-xs font-medium text-slate-300">
                     Campus Location
                   </label>
                   <select
                     required
                     value={locationId}
                     onChange={(e) => setLocationId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm bg-slate-900/80 border border-white/10 rounded-xl text-white focus:outline-none focus:border-sky-400 transition-colors"
+                    className="w-full px-3.5 py-2.5 text-xs saas-input"
                   >
                     <option value="">Select location...</option>
                     {locations.map((loc) => (
@@ -276,7 +263,7 @@ export default function StudentDashboard() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
+                <label className="block text-xs font-medium text-slate-300">
                   Complaint Subject / Title
                 </label>
                 <input
@@ -285,12 +272,12 @@ export default function StudentDashboard() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g., Tube light flickering violently in Lab 302"
-                  className="w-full px-3.5 py-2.5 text-sm bg-slate-900/80 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 transition-colors"
+                  className="w-full px-3.5 py-2.5 text-xs saas-input"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
+                <label className="block text-xs font-medium text-slate-300">
                   Detailed Diagnostic Description
                 </label>
                 <textarea
@@ -299,29 +286,27 @@ export default function StudentDashboard() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the issue, specific spot, equipment number, or urgency..."
-                  className="w-full px-3.5 py-2.5 text-sm bg-slate-900/80 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 transition-colors"
+                  className="w-full px-3.5 py-2.5 text-xs saas-input"
                 />
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
-                    Initial Priority Assessment
-                  </label>
-                  <select
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value)}
-                    className="px-3.5 py-2 text-sm bg-slate-900/80 border border-white/10 rounded-xl text-white focus:outline-none focus:border-sky-400 transition-colors"
-                  >
-                    <option value="LOW">Low</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HIGH">High</option>
-                    <option value="CRITICAL">Critical (Safety hazard)</option>
-                  </select>
-                </div>
+              <div className="space-y-1.5 max-w-xs">
+                <label className="block text-xs font-medium text-slate-300">
+                  Initial Priority Assessment
+                </label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs saas-input"
+                >
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="CRITICAL">Critical (Safety hazard)</option>
+                </select>
               </div>
 
-              {/* Real-time Semantic Vector Similarity Warning Strip */}
+              {/* Semantic Vector Duplicate Alert */}
               {checkingSimilarity && (
                 <div className="text-xs text-sky-400 flex items-center gap-2 font-medium py-1">
                   <Sparkles className="w-3.5 h-3.5 animate-spin text-sky-300" />
@@ -330,7 +315,7 @@ export default function StudentDashboard() {
               )}
 
               {similarWarnings.length > 0 && (
-                <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 space-y-3">
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200 space-y-3">
                   <div className="text-xs font-bold flex items-center gap-2 text-amber-300">
                     <AlertTriangle className="w-4 h-4 text-amber-400" />
                     <span>pgvector Duplicate Warning: Similar issues already exist!</span>
@@ -339,7 +324,7 @@ export default function StudentDashboard() {
                     {similarWarnings.map((sim) => (
                       <div
                         key={sim.complaint_id}
-                        className="text-xs bg-slate-900/80 p-3 rounded-xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                        className="text-xs bg-slate-900/80 p-3 rounded-lg border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                       >
                         <div>
                           <span className="font-semibold text-white">{sim.title}</span>
@@ -352,73 +337,85 @@ export default function StudentDashboard() {
                     ))}
                   </div>
                   <p className="text-[11px] text-slate-400">
-                    If your issue refers to the same fault, maintenance is already dispatching technicians. You may still submit if providing additional context.
+                    If your issue refers to the same fault, technicians may already be working on it. You can still proceed if submitting additional details.
                   </p>
                 </div>
               )}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <GlowButton
+                <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setShowForm(false)}
                 >
                   Cancel
-                </GlowButton>
-                <GlowButton
+                </Button>
+                <Button
                   type="submit"
                   variant="primary"
                   isLoading={submitting}
                   icon={<ArrowRight className="w-4 h-4" />}
                 >
                   {submitting ? 'Generating Embeddings & Storing...' : 'Submit Complaint'}
-                </GlowButton>
+                </Button>
               </div>
             </form>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Complaints List */}
-      <div className="relative z-10 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Layers className="w-5 h-5 text-sky-400" />
-            <span>My Submitted Complaints ({complaints.length})</span>
+      {/* Complaints List Section */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <Layers className="w-4 h-4 text-brand-400" />
+            <span>My Submitted Complaints ({filteredComplaints.length})</span>
           </h2>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+            <input
+              type="text"
+              placeholder="Filter by keyword, room..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-1.5 text-xs saas-input"
+            />
+          </div>
         </div>
 
         {loading ? (
-          <div className="glass-panel rounded-3xl p-12 text-center text-slate-400">
-            Querying PostgreSQL 15 database...
+          <div className="saas-card p-8">
+            <LoadingSkeleton lines={4} />
           </div>
-        ) : complaints.length === 0 ? (
-          <div className="glass-panel rounded-3xl p-12 text-center border border-white/10 space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-            <p className="font-semibold text-white">No active complaints found</p>
-            <p className="text-xs text-slate-400">Click &ldquo;File Complaint&rdquo; above to report an issue on campus.</p>
-          </div>
+        ) : filteredComplaints.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle2}
+            title={complaints.length === 0 ? 'No active complaints logged' : 'No complaints match filter'}
+            description={complaints.length === 0 ? 'Click "Log Maintenance Request" above to report a campus facility issue.' : 'Try adjusting your search keywords.'}
+            actionLabel={complaints.length === 0 ? 'File First Complaint' : undefined}
+            onAction={complaints.length === 0 ? () => setShowForm(true) : undefined}
+          />
         ) : (
-          <div className="grid grid-cols-1 gap-3.5">
-            {complaints.map((c) => (
-              <motion.div
+          <div className="grid grid-cols-1 gap-3">
+            {filteredComplaints.map((c) => (
+              <div
                 key={c.complaint_id}
-                whileHover={{ scale: 1.005 }}
-                className="glass-card p-5 rounded-2xl border border-white/10 hover:border-sky-500/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="saas-card p-5 hover:border-white/20 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
               >
                 <div className="space-y-2 max-w-2xl">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs text-slate-400 font-bold bg-slate-800/80 px-2 py-0.5 rounded border border-white/5">
+                    <span className="font-mono text-xs text-slate-400 font-bold bg-white/5 px-2 py-0.5 rounded">
                       #{c.complaint_id}
                     </span>
-                    {getStatusBadge(c.status)}
-                    {getPriorityBadge(c.priority)}
-                    <span className="text-xs text-slate-400 bg-slate-800/60 px-2.5 py-0.5 rounded-full border border-white/5">
+                    <StatusBadge status={c.status} />
+                    <PriorityBadge priority={c.priority} />
+                    <span className="text-xs text-slate-400 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/5">
                       {c.category_name}
                     </span>
                   </div>
 
-                  <h3 className="font-bold text-white text-base">
+                  <h3 className="font-semibold text-white text-sm">
                     {c.title}
                   </h3>
 
@@ -426,9 +423,9 @@ export default function StudentDashboard() {
                     {c.description}
                   </p>
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-0.5">
                     <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-sky-400" />
+                      <MapPin className="w-3.5 h-3.5 text-brand-400" />
                       {c.building}, {c.room}
                     </span>
                     <span className="flex items-center gap-1.5">
@@ -445,16 +442,17 @@ export default function StudentDashboard() {
 
                 <div className="flex items-center gap-3">
                   <Link href={`/complaints/${c.complaint_id}`}>
-                    <GlowButton variant="secondary" size="sm" icon={<ArrowRight className="w-3.5 h-3.5" />}>
+                    <Button variant="secondary" size="sm" icon={<ArrowRight className="w-3.5 h-3.5" />}>
                       Details & History
-                    </GlowButton>
+                    </Button>
                   </Link>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
       </div>
+
     </div>
   );
 }

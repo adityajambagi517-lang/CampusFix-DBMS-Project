@@ -12,13 +12,15 @@ import {
   Play, 
   Check, 
   AlertCircle,
-  Calendar,
-  Layers,
-  Sparkles
+  Sparkles,
+  Calendar
 } from 'lucide-react';
 import { Complaint } from '@/types';
-import { AmbientGlow } from '@/components/ui/AmbientGlow';
-import { GlowButton } from '@/components/ui/GlowButton';
+import { Button } from '@/components/ui/Button';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { PriorityBadge } from '@/components/ui/PriorityBadge';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 
 export default function StaffDashboard() {
   const [tasks, setTasks] = useState<Complaint[]>([]);
@@ -77,35 +79,34 @@ export default function StaffDashboard() {
   });
 
   return (
-    <div className="relative min-h-[calc(100vh-6rem)] space-y-8 py-6 pb-20">
-      <AmbientGlow variant="amber" />
-
-      {/* Header & Skiper UI Control Bar */}
-      <div className="relative z-10 glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
+    <div className="space-y-8 pb-16">
+      
+      {/* Header & Segmented Filter Bar */}
+      <div className="saas-card p-6 sm:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-400/30 mb-2">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/20 mb-2">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Technician Dispatch Queue</span>
+              <span>Technician Workstation Queue</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-              <Wrench className="w-7 h-7 text-amber-400" />
-              <span>Maintenance Workstation</span>
+              <Wrench className="w-6 h-6 text-amber-400" />
+              <span>Maintenance Work Orders</span>
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Live trade work orders, automated SLA countdowns, and instant atomic resolution.
+              Assigned facility orders with live SLA timers and atomic resolution execution.
             </p>
           </div>
 
-          {/* Skiper UI Segmented Control Tabs */}
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-900/80 border border-white/10">
+          {/* Segmented Control Filter */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-white/5 border border-white/10 self-start sm:self-center">
             {(['ALL', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   filter === tab
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -116,75 +117,58 @@ export default function StaffDashboard() {
         </div>
       </div>
 
-      {/* Task Cards */}
-      <div className="relative z-10 space-y-4">
+      {/* Work Orders List */}
+      <div className="space-y-4">
         {loading ? (
-          <div className="glass-panel rounded-3xl p-12 text-center text-slate-400">
-            Fetching assigned work orders from PostgreSQL...
+          <div className="saas-card p-8">
+            <LoadingSkeleton lines={4} />
           </div>
         ) : filteredTasks.length === 0 ? (
-          <div className="glass-panel rounded-3xl p-12 text-center border border-white/10 space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-            <p className="font-semibold text-white">No work orders matching &ldquo;{filter}&rdquo;</p>
-            <p className="text-xs text-slate-400">All tasks in this category are up to date.</p>
-          </div>
+          <EmptyState
+            icon={CheckCircle2}
+            title={`No work orders matching "${filter.replace('_', ' ')}"`}
+            description="All facility orders in this category have been attended to."
+          />
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {filteredTasks.map((task) => (
-              <motion.div
+              <div
                 key={task.complaint_id}
-                whileHover={{ scale: 1.005 }}
-                className="glass-card p-6 rounded-2xl border border-white/10 hover:border-amber-500/40 transition-all space-y-4"
+                className="saas-card p-6 hover:border-amber-500/30 transition-all space-y-4"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-white/5">
+                      <span className="font-mono text-xs font-bold text-slate-400 bg-white/5 px-2 py-0.5 rounded">
                         #{task.complaint_id}
                       </span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                        task.status === 'IN_PROGRESS' 
-                          ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                          : task.status === 'RESOLVED'
-                          ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                          : 'bg-purple-500/15 text-purple-300 border border-purple-500/30'
-                      }`}>
-                        {task.status}
-                      </span>
-                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${
-                        task.priority === 'CRITICAL'
-                          ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
-                          : task.priority === 'HIGH'
-                          ? 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
-                          : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                      }`}>
-                        {task.priority} Priority
-                      </span>
-                      <span className="text-xs text-slate-400 bg-slate-800/60 px-2.5 py-0.5 rounded-full border border-white/5">
+                      <StatusBadge status={task.status} />
+                      <PriorityBadge priority={task.priority} />
+                      <span className="text-xs text-slate-400 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/5">
                         {task.category_name}
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-white pt-1">
+                    <h3 className="text-base font-bold text-white pt-1">
                       {task.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    <p className="text-xs text-slate-300 leading-relaxed">
                       {task.description}
                     </p>
                   </div>
 
-                  {/* SLA Badge */}
+                  {/* SLA Countdown Badge */}
                   <div className="sm:text-right flex-shrink-0">
-                    <span className={`inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-semibold ${
+                    <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-semibold ${
                       task.sla_status === 'BREACHED'
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30 animate-pulse'
+                        : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                     }`}>
                       <Clock className="w-3.5 h-3.5" />
                       {task.sla_status === 'BREACHED' ? 'SLA Breached' : 'On Schedule'}
                     </span>
                     {task.sla_due_at && (
-                      <div className="text-[11px] text-slate-400 font-mono pt-1.5">
+                      <div className="text-[11px] text-slate-400 font-mono pt-1">
                         Due: {new Date(task.sla_due_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     )}
@@ -192,7 +176,7 @@ export default function StaffDashboard() {
                 </div>
 
                 {/* Location & Reporter Info Strip */}
-                <div className="flex flex-wrap items-center gap-6 text-xs text-slate-400 bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                <div className="flex flex-wrap items-center gap-6 text-xs text-slate-400 bg-white/5 p-3 rounded-xl border border-white/5">
                   <span className="flex items-center gap-1.5 font-medium text-amber-300">
                     <MapPin className="w-3.5 h-3.5 text-amber-400" />
                     {task.building} · Floor {task.floor} · Room {task.room}
@@ -205,7 +189,7 @@ export default function StaffDashboard() {
                   </span>
                 </div>
 
-                {/* Tactile Action Triggers */}
+                {/* Actions */}
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10">
                   <Link
                     href={`/complaints/${task.complaint_id}`}
@@ -217,7 +201,7 @@ export default function StaffDashboard() {
 
                   <div className="flex items-center gap-2">
                     {task.status === 'ASSIGNED' && (
-                      <GlowButton
+                      <Button
                         variant="primary"
                         size="sm"
                         onClick={() => handleStatusChange(task.complaint_id, 'IN_PROGRESS')}
@@ -225,31 +209,31 @@ export default function StaffDashboard() {
                         icon={<Play className="w-3.5 h-3.5" />}
                       >
                         Start Work (In Progress)
-                      </GlowButton>
+                      </Button>
                     )}
 
                     {task.status === 'IN_PROGRESS' && (
-                      <GlowButton
-                        variant="emerald"
+                      <Button
+                        variant="success"
                         size="sm"
                         onClick={() => setResolveModalId(task.complaint_id)}
                         isLoading={updatingId === task.complaint_id}
                         icon={<Check className="w-3.5 h-3.5" />}
                       >
                         Mark Task Resolved
-                      </GlowButton>
+                      </Button>
                     )}
                   </div>
                 </div>
 
-                {/* Inline Resolution Modal (Animmaster Slide) */}
+                {/* Inline Resolution Modal */}
                 <AnimatePresence>
                   {resolveModalId === task.complaint_id && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-4 bg-emerald-950/40 rounded-2xl border border-emerald-500/30 space-y-3"
+                      exit={{ opacity: 0, y: -8 }}
+                      className="p-4 bg-emerald-950/20 rounded-xl border border-emerald-500/30 space-y-3"
                     >
                       <div className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -257,38 +241,39 @@ export default function StaffDashboard() {
                       </div>
                       <textarea
                         rows={2}
-                        placeholder="Enter technician remarks (e.g., Replaced faulty capacitor, safety inspection complete)..."
+                        placeholder="Enter technician remarks (e.g., Replaced capacitor, tested circuit, safe to operate)..."
                         value={resolutionRemarks}
                         onChange={(e) => setResolutionRemarks(e.target.value)}
-                        className="w-full text-xs p-3 bg-slate-900/90 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition-colors"
+                        className="w-full text-xs p-3 saas-input"
                       />
                       <div className="flex justify-end gap-2.5">
-                        <GlowButton
+                        <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => setResolveModalId(null)}
                         >
                           Cancel
-                        </GlowButton>
-                        <GlowButton
+                        </Button>
+                        <Button
                           type="button"
-                          variant="emerald"
+                          variant="success"
                           size="sm"
                           onClick={() => handleStatusChange(task.complaint_id, 'RESOLVED', resolutionRemarks)}
                           isLoading={updatingId === task.complaint_id}
                         >
                           Submit Resolution
-                        </GlowButton>
+                        </Button>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
       </div>
+
     </div>
   );
 }
