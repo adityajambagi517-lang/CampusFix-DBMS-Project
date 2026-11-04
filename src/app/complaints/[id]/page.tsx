@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
   Clock, 
@@ -18,6 +19,9 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { Complaint, StatusHistoryItem, CommentItem, SimilarComplaint, UserSession } from '@/types';
+import { AmbientGlow } from '@/components/ui/AmbientGlow';
+import { GlowButton } from '@/components/ui/GlowButton';
+import { SimilarityBadge } from '@/components/ui/SimilarityBadge';
 
 export default function ComplaintDetailPage() {
   const params = useParams();
@@ -105,113 +109,128 @@ export default function ComplaintDetailPage() {
 
   if (loading) {
     return (
-      <div className="bg-white p-12 rounded-2xl text-center text-slate-400">
-        Loading complaint record #{complaintId}...
+      <div className="relative min-h-[calc(100vh-6rem)] flex items-center justify-center">
+        <AmbientGlow variant="cyber" />
+        <div className="glass-panel rounded-3xl p-12 text-center text-slate-400 relative z-10">
+          Loading complaint record #{complaintId} from PostgreSQL...
+        </div>
       </div>
     );
   }
 
   if (!complaint) {
     return (
-      <div className="bg-white p-12 rounded-2xl text-center text-slate-500">
-        Complaint not found.
+      <div className="relative min-h-[calc(100vh-6rem)] flex items-center justify-center">
+        <AmbientGlow variant="cyber" />
+        <div className="glass-panel rounded-3xl p-12 text-center text-slate-400 relative z-10">
+          Complaint not found.
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="relative min-h-[calc(100vh-6rem)] space-y-8 py-6 pb-20">
+      <AmbientGlow variant="multi" />
+
       {/* Back button & Breadcrumb */}
-      <div className="flex items-center justify-between">
-        <button
+      <div className="relative z-10 flex items-center justify-between">
+        <GlowButton
+          variant="secondary"
+          size="sm"
           onClick={() => router.back()}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 bg-white shadow-sm"
+          icon={<ArrowLeft className="w-3.5 h-3.5" />}
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back
-        </button>
-        <span className="font-mono text-xs text-slate-400">Record ID: #{complaint.complaint_id}</span>
+          Back
+        </GlowButton>
+        <span className="font-mono text-xs text-slate-400 bg-slate-900/60 px-3 py-1 rounded-full border border-white/5">
+          Record ID: #{complaint.complaint_id}
+        </span>
       </div>
 
       {/* Main Ticket Header Card */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-          <div className="space-y-2 max-w-3xl">
+      <div className="relative z-10 glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+          <div className="space-y-3 max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+              <span className={`px-3 py-0.5 rounded-full text-xs font-bold ${
                 complaint.status === 'OPEN'
-                  ? 'bg-blue-100 text-blue-800'
+                  ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30'
                   : complaint.status === 'ASSIGNED'
-                  ? 'bg-purple-100 text-purple-800'
+                  ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30'
                   : complaint.status === 'IN_PROGRESS'
-                  ? 'bg-amber-100 text-amber-800'
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                   : complaint.status === 'RESOLVED'
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : 'bg-red-100 text-red-800'
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                  : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
               }`}>
                 {complaint.status}
               </span>
 
-              <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+              <span className={`text-xs font-bold px-2.5 py-0.5 rounded ${
                 complaint.priority === 'CRITICAL'
-                  ? 'bg-red-100 text-red-800'
+                  ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                   : complaint.priority === 'HIGH'
-                  ? 'bg-orange-100 text-orange-800'
-                  : 'bg-yellow-100 text-yellow-800'
+                  ? 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
+                  : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
               }`}>
                 {complaint.priority} Priority
               </span>
 
-              <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded font-medium">
+              <span className="text-xs bg-slate-800 text-slate-300 px-3 py-0.5 rounded-full border border-white/5 font-medium">
                 {complaint.category_name}
               </span>
 
-              <span className="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded font-medium">
+              <span className="text-xs text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 px-3 py-0.5 rounded-full font-medium">
                 {complaint.department_name}
               </span>
             </div>
 
-            <h1 className="text-2xl font-bold text-slate-900 pt-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight pt-1">
               {complaint.title}
             </h1>
 
-            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50/70 p-4 rounded-xl border border-slate-100">
+            <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap bg-slate-900/70 p-4 rounded-2xl border border-white/5">
               {complaint.description}
-            </p>
+            </div>
           </div>
 
           {/* Quick Staff / Admin Action Box */}
           {user && (user.roleName === 'ADMIN' || user.roleName === 'MAINTENANCE_STAFF') && (
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex-shrink-0 space-y-2">
-              <div className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <div className="glass-card p-4 rounded-2xl border border-white/10 flex-shrink-0 space-y-3 min-w-[200px]">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Status Controls
               </div>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 {complaint.status !== 'IN_PROGRESS' && complaint.status !== 'RESOLVED' && (
-                  <button
+                  <GlowButton
+                    variant="primary"
+                    size="sm"
                     onClick={() => handleQuickStatus('IN_PROGRESS')}
-                    disabled={statusUpdating}
-                    className="text-xs font-semibold px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow-sm"
+                    isLoading={statusUpdating}
                   >
                     Set In Progress
-                  </button>
+                  </GlowButton>
                 )}
                 {complaint.status !== 'RESOLVED' && (
-                  <button
+                  <GlowButton
+                    variant="emerald"
+                    size="sm"
                     onClick={() => handleQuickStatus('RESOLVED')}
-                    disabled={statusUpdating}
-                    className="text-xs font-semibold px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-sm"
+                    isLoading={statusUpdating}
                   >
                     Mark Resolved
-                  </button>
+                  </GlowButton>
                 )}
                 {complaint.status !== 'CLOSED' && (
-                  <button
+                  <GlowButton
+                    variant="secondary"
+                    size="sm"
                     onClick={() => handleQuickStatus('CLOSED')}
-                    disabled={statusUpdating}
-                    className="text-xs font-semibold px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg shadow-sm"
+                    isLoading={statusUpdating}
                   >
                     Close Complaint
-                  </button>
+                  </GlowButton>
                 )}
               </div>
             </div>
@@ -219,27 +238,27 @@ export default function ComplaintDetailPage() {
         </div>
 
         {/* Metadata Footer */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-xs text-slate-600">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-white/10 text-xs text-slate-400">
           <div>
-            <span className="font-semibold text-slate-800 block">Reported By:</span>
-            {complaint.reporter_name} ({complaint.reporter_email})
+            <span className="font-semibold text-white block mb-0.5">Reported By:</span>
+            {complaint.reporter_name} <span className="font-mono text-slate-500">({complaint.reporter_email})</span>
           </div>
           <div>
-            <span className="font-semibold text-slate-800 block">Campus Location:</span>
+            <span className="font-semibold text-white block mb-0.5">Campus Location:</span>
             {complaint.building} — {complaint.room} ({complaint.floor})
           </div>
           <div>
-            <span className="font-semibold text-slate-800 block">Assigned Technician:</span>
+            <span className="font-semibold text-white block mb-0.5">Assigned Technician:</span>
             {complaint.assigned_staff_name ? (
-              <span className="text-purple-700 font-bold">{complaint.assigned_staff_name}</span>
+              <span className="text-purple-300 font-bold">{complaint.assigned_staff_name}</span>
             ) : (
-              <span className="text-slate-400 italic">Unassigned</span>
+              <span className="text-slate-500 italic">Unassigned</span>
             )}
           </div>
           <div>
-            <span className="font-semibold text-slate-800 block">SLA Target Deadline:</span>
+            <span className="font-semibold text-white block mb-0.5">SLA Target Deadline:</span>
             {complaint.sla_due_at ? (
-              <span className={complaint.sla_status === 'BREACHED' ? 'text-red-600 font-bold' : 'text-slate-700'}>
+              <span className={complaint.sla_status === 'BREACHED' ? 'text-rose-400 font-bold' : 'text-slate-300'}>
                 {new Date(complaint.sla_due_at).toLocaleString()}
               </span>
             ) : (
@@ -249,89 +268,95 @@ export default function ComplaintDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Comments & Similar Complaints */}
         <div className="lg:col-span-2 space-y-8">
           {/* Comments Discussion Thread */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-sky-600" /> Discussion & Remarks ({comments.length})
+          <div className="glass-panel rounded-3xl p-6 border border-white/10 shadow-xl space-y-4">
+            <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-sky-400" />
+              <span>Discussion & Remarks ({comments.length})</span>
             </h2>
 
             <div className="space-y-3">
               {comments.length === 0 ? (
-                <div className="text-xs text-slate-400 italic py-2">No comments posted yet.</div>
+                <div className="text-xs text-slate-500 italic py-2">No comments posted yet.</div>
               ) : (
                 comments.map((cm) => (
-                  <div key={cm.comment_id} className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
+                  <div key={cm.comment_id} className="p-3.5 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-800">
+                      <span className="font-bold text-white">
                         {cm.author_name}{' '}
-                        <span className="font-normal text-[10px] text-slate-400">({cm.author_role})</span>
+                        <span className="font-normal text-[10px] text-slate-400 font-mono">({cm.author_role})</span>
                       </span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-slate-500 font-mono">
                         {new Date(cm.created_at).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-700 whitespace-pre-wrap">{cm.body}</p>
+                    <p className="text-xs text-slate-300 whitespace-pre-wrap leading-relaxed">{cm.body}</p>
                   </div>
                 ))
               )}
             </div>
 
             {/* Comment Post Box */}
-            <form onSubmit={handlePostComment} className="pt-2 flex gap-2">
+            <form onSubmit={handlePostComment} className="pt-2 flex gap-2.5">
               <input
                 type="text"
-                placeholder="Write a message, repair update, or note..."
+                placeholder="Write an update, note, or remarks..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                className="flex-1 text-xs px-3.5 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="flex-1 text-xs px-4 py-2.5 bg-slate-900/80 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 transition-colors"
               />
-              <button
+              <GlowButton
                 type="submit"
-                disabled={submittingComment || !commentText.trim()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-semibold shadow-sm disabled:opacity-50"
+                variant="primary"
+                size="sm"
+                isLoading={submittingComment}
+                disabled={!commentText.trim()}
+                icon={<Send className="w-3.5 h-3.5" />}
               >
-                <Send className="w-3.5 h-3.5" /> Post
-              </button>
+                Post
+              </GlowButton>
             </form>
           </div>
 
           {/* Semantically Similar Complaints via pgvector */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div className="glass-panel rounded-3xl p-6 border border-white/10 shadow-xl space-y-4">
             <div>
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-600" /> Semantically Similar Complaints (pgvector)
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-indigo-400" />
+                <span>Semantically Similar Complaints (pgvector)</span>
               </h2>
-              <p className="text-xs text-slate-500">
-                Matched via 384-dimensional cosine distance (<code className="font-mono text-indigo-700 text-[11px]">fn_match_similar_complaints</code>)
+              <p className="text-xs text-slate-400 mt-0.5">
+                Matched via 384-dimensional cosine distance (<code className="font-mono text-indigo-300 text-[11px]">fn_match_similar_complaints</code>)
               </p>
             </div>
 
             {similar.length === 0 ? (
-              <div className="text-xs text-slate-400 italic py-2">
+              <div className="text-xs text-slate-500 italic py-2">
                 No similar issues detected above 60% cosine similarity threshold.
               </div>
             ) : (
               <div className="space-y-2.5">
                 {similar.map((s) => (
-                  <div key={s.complaint_id} className="p-3 rounded-xl border border-indigo-100 bg-indigo-50/40 flex items-center justify-between gap-3">
+                  <div
+                    key={s.complaint_id}
+                    className="p-3.5 rounded-2xl border border-white/5 bg-slate-900/60 flex items-center justify-between gap-3 hover:border-indigo-500/30 transition-colors"
+                  >
                     <div className="space-y-0.5">
-                      <div className="font-bold text-xs text-slate-900">{s.title}</div>
-                      <div className="text-[11px] text-slate-500">
-                        {s.building} — {s.room} • {s.category_name} • Status: <span className="font-semibold text-slate-700">{s.status}</span>
+                      <div className="font-bold text-xs text-white">{s.title}</div>
+                      <div className="text-[11px] text-slate-400">
+                        {s.building} — {s.room} · {s.category_name} · Status: <span className="font-semibold text-sky-300">{s.status}</span>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">
-                        {Math.round(s.similarity * 100)}% Match
-                      </span>
+                    <div className="text-right flex-shrink-0 flex items-center gap-3">
+                      <SimilarityBadge score={s.similarity} />
                       <Link
                         href={`/complaints/${s.complaint_id}`}
-                        className="block text-[10px] text-indigo-600 hover:underline pt-1"
+                        className="text-xs text-sky-400 hover:text-sky-300 font-semibold"
                       >
-                        Inspect #{s.complaint_id}
+                        Inspect
                       </Link>
                     </div>
                   </div>
@@ -341,33 +366,34 @@ export default function ComplaintDetailPage() {
           </div>
         </div>
 
-        {/* Right Column: Trigger-backed Status History Audit Trail */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        {/* Right Column: Trigger-backed Status History Audit Trail (Animmaster Vertical Rail) */}
+        <div className="glass-panel rounded-3xl p-6 border border-white/10 shadow-xl space-y-4 h-fit">
           <div>
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <History className="w-5 h-5 text-emerald-600" /> Lifecycle Audit Trail
+            <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <History className="w-5 h-5 text-emerald-400" />
+              <span>Lifecycle Audit Trail</span>
             </h2>
-            <p className="text-xs text-slate-500">
-              Automatic triggers (<code className="font-mono text-emerald-700 text-[11px]">trg_complaint_status_history</code>)
+            <p className="text-xs text-slate-400 mt-0.5">
+              Automated database trigger (<code className="font-mono text-emerald-300 text-[11px]">trg_complaint_status_history</code>)
             </p>
           </div>
 
-          <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+          <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-white/10">
             {history.map((h, idx) => (
               <div key={h.history_id} className="relative space-y-1">
-                <div className="absolute -left-6 top-0.5 w-4 h-4 rounded-full bg-white border-2 border-emerald-500 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                <div className="absolute -left-6 top-1 w-4 h-4 rounded-full bg-slate-900 border-2 border-emerald-400 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-900">
+                  <span className="font-bold text-white">
                     {h.new_status}
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-500 font-mono">
                     {new Date(h.changed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
                 {h.remarks && (
-                  <p className="text-xs text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                  <p className="text-xs text-slate-300 bg-slate-900/80 p-2.5 rounded-xl border border-white/5">
                     {h.remarks}
                   </p>
                 )}
@@ -382,4 +408,3 @@ export default function ComplaintDetailPage() {
     </div>
   );
 }
-

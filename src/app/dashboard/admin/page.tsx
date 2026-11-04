@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, 
   Search, 
@@ -12,12 +13,14 @@ import {
   AlertTriangle, 
   CheckCircle2, 
   ArrowRight,
-  TrendingUp,
   BarChart3,
-  Layers,
-  Zap
+  Sparkles,
+  X
 } from 'lucide-react';
 import { Complaint } from '@/types';
+import { AmbientGlow } from '@/components/ui/AmbientGlow';
+import { GlowButton } from '@/components/ui/GlowButton';
+import { MetricCounter } from '@/components/ui/MetricCounter';
 
 export default function AdminDashboard() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -100,65 +103,81 @@ export default function AdminDashboard() {
   const criticalCount = complaints.filter((c) => c.priority === 'CRITICAL' || c.status === 'ESCALATED').length;
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-purple-600" /> Admin Dispatch & Workflow Center
-          </h1>
-          <p className="text-sm text-slate-500">
-            Campus-wide maintenance oversight, smart technician dispatch, and SLA management
-          </p>
+    <div className="relative min-h-[calc(100vh-6rem)] space-y-8 py-6 pb-20">
+      <AmbientGlow variant="cyber" />
+
+      {/* Header & Control Center Strip */}
+      <div className="relative z-10 glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/15 text-purple-300 border border-purple-400/30 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+              <span>Campus Facilities Control Deck</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <ShieldCheck className="w-7 h-7 text-purple-400" />
+              <span>Admin Dispatch Center</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              Cross-department oversight, automated technician dispatch via <code className="text-purple-300">fn_assign_complaint</code>, and SLA surveillance.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link href="/analytics">
+              <GlowButton variant="secondary" size="md" icon={<BarChart3 className="w-4 h-4 text-purple-400" />}>
+                Workload Analytics
+              </GlowButton>
+            </Link>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/analytics"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 font-semibold text-xs border border-purple-200 transition-colors"
-          >
-            <BarChart3 className="w-4 h-4" /> Workload Views & Analytics
-          </Link>
-        </div>
-      </div>
-
-      {/* Metrics Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-xs font-semibold text-slate-500 uppercase">Filtered Total</div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{totalCount}</div>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-blue-200 bg-blue-50/30 shadow-sm">
-          <div className="text-xs font-semibold text-blue-700 uppercase">Unassigned / Open</div>
-          <div className="text-2xl font-bold text-blue-800 mt-1">{openCount}</div>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-amber-200 bg-amber-50/30 shadow-sm">
-          <div className="text-xs font-semibold text-amber-700 uppercase">Active / Dispatched</div>
-          <div className="text-2xl font-bold text-amber-800 mt-1">{inProgressCount}</div>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-red-200 bg-red-50/30 shadow-sm">
-          <div className="text-xs font-semibold text-red-700 uppercase">Critical / Escalated</div>
-          <div className="text-2xl font-bold text-red-800 mt-1">{criticalCount}</div>
+        {/* Skiper UI KPI Grid with Kinetic Counters */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/10">
+          <div className="p-4 rounded-2xl bg-slate-900/60 border border-white/5 space-y-1">
+            <div className="text-xs font-medium text-slate-400">Total Filtered Tickets</div>
+            <div className="text-2xl font-extrabold text-white">
+              <MetricCounter value={totalCount} />
+            </div>
+          </div>
+          <div className="p-4 rounded-2xl bg-sky-950/40 border border-sky-500/20 space-y-1">
+            <div className="text-xs font-medium text-sky-400">Unassigned / Open</div>
+            <div className="text-2xl font-extrabold text-sky-300">
+              <MetricCounter value={openCount} />
+            </div>
+          </div>
+          <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/20 space-y-1">
+            <div className="text-xs font-medium text-amber-400">Active Work Orders</div>
+            <div className="text-2xl font-extrabold text-amber-300">
+              <MetricCounter value={inProgressCount} />
+            </div>
+          </div>
+          <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-500/20 space-y-1">
+            <div className="text-xs font-medium text-rose-400">Critical / Escalated</div>
+            <div className="text-2xl font-extrabold text-rose-300">
+              <MetricCounter value={criticalCount} />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-3">
-        <div className="flex-1 min-w-[200px] relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+      <div className="relative z-10 glass-panel rounded-2xl p-4 border border-white/10 flex flex-wrap items-center gap-3 shadow-lg">
+        <div className="flex-1 min-w-[220px] relative">
+          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
           <input
             type="text"
-            placeholder="Search title, description, building, room..."
+            placeholder="Search complaint title, room, reporter, building..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-10 pr-3.5 py-2 text-xs bg-slate-900/80 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition-colors"
           />
         </div>
 
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="text-xs px-3.5 py-2 bg-slate-900/80 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-400 transition-colors"
         >
           <option value="">All Statuses</option>
           <option value="OPEN">OPEN</option>
@@ -172,7 +191,7 @@ export default function AdminDashboard() {
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
-          className="text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="text-xs px-3.5 py-2 bg-slate-900/80 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-400 transition-colors"
         >
           <option value="">All Priorities</option>
           <option value="CRITICAL">CRITICAL</option>
@@ -184,7 +203,7 @@ export default function AdminDashboard() {
         <select
           value={deptFilter}
           onChange={(e) => setDeptFilter(e.target.value)}
-          className="text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="text-xs px-3.5 py-2 bg-slate-900/80 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-400 transition-colors"
         >
           <option value="">All Departments</option>
           {departments.map((d) => (
@@ -195,104 +214,104 @@ export default function AdminDashboard() {
         </select>
       </div>
 
-      {/* Complaints Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* Complaints Dispatch Table */}
+      <div className="relative z-10 glass-panel rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-400">Loading complaints...</div>
+          <div className="p-14 text-center text-slate-400">Querying complaints and status history views...</div>
         ) : complaints.length === 0 ? (
-          <div className="p-12 text-center text-slate-500">No complaints matched the criteria.</div>
+          <div className="p-14 text-center text-slate-400">No complaints matched the active filters.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-semibold">
-                  <th className="py-3 px-4">ID</th>
-                  <th className="py-3 px-4">Title & Details</th>
-                  <th className="py-3 px-4">Location</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">SLA Deadline</th>
-                  <th className="py-3 px-4">Assigned Technician</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                <tr className="bg-slate-900/80 border-b border-white/10 text-slate-400 uppercase font-semibold">
+                  <th className="py-3.5 px-4">Ticket</th>
+                  <th className="py-3.5 px-4">Subject & Reporter</th>
+                  <th className="py-3.5 px-4">Location</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">Priority</th>
+                  <th className="py-3.5 px-4">SLA Due</th>
+                  <th className="py-3.5 px-4">Assigned Technician</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-white/5">
                 {complaints.map((c) => (
-                  <tr key={c.complaint_id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-400">
+                  <tr key={c.complaint_id} className="hover:bg-white/[0.03] transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-bold text-slate-400">
                       #{c.complaint_id}
                     </td>
-                    <td className="py-3 px-4 max-w-xs">
-                      <div className="font-bold text-slate-900 truncate">{c.title}</div>
-                      <div className="text-[11px] text-slate-500">
-                        {c.category_name} • By: {c.reporter_name}
+                    <td className="py-3.5 px-4 max-w-xs">
+                      <div className="font-bold text-white truncate">{c.title}</div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">
+                        {c.category_name} · By {c.reporter_name}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-slate-800">{c.building}</div>
-                      <div className="text-[11px] text-slate-500">{c.room} ({c.floor})</div>
+                    <td className="py-3.5 px-4">
+                      <div className="font-medium text-slate-200">{c.building}</div>
+                      <div className="text-[11px] text-slate-400">{c.room} ({c.floor})</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded-full font-semibold text-[10px] ${
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2.5 py-0.5 rounded-full font-semibold text-[10px] ${
                         c.status === 'OPEN'
-                          ? 'bg-blue-100 text-blue-800'
+                          ? 'bg-sky-500/15 text-sky-300 border border-sky-500/30'
                           : c.status === 'ASSIGNED'
-                          ? 'bg-purple-100 text-purple-800'
+                          ? 'bg-purple-500/15 text-purple-300 border border-purple-500/30'
                           : c.status === 'IN_PROGRESS'
-                          ? 'bg-amber-100 text-amber-800'
+                          ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                           : c.status === 'RESOLVED'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                          : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                       }`}>
                         {c.status}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <span className={`font-bold ${
                         c.priority === 'CRITICAL'
-                          ? 'text-red-700'
+                          ? 'text-rose-400'
                           : c.priority === 'HIGH'
-                          ? 'text-orange-600'
-                          : 'text-slate-700'
+                          ? 'text-orange-400'
+                          : 'text-slate-300'
                       }`}>
                         {c.priority}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       {c.sla_due_at ? (
-                        <div className={`font-medium ${c.sla_status === 'BREACHED' ? 'text-red-600 font-bold' : 'text-slate-600'}`}>
+                        <div className={`font-medium ${c.sla_status === 'BREACHED' ? 'text-rose-400 font-bold' : 'text-slate-300'}`}>
                           {new Date(c.sla_due_at).toLocaleDateString()}{' '}
                           {new Date(c.sla_due_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       ) : (
-                        <span className="text-slate-400">N/A</span>
+                        <span className="text-slate-500">N/A</span>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       {c.assigned_staff_name ? (
                         <div>
-                          <div className="font-semibold text-purple-900">{c.assigned_staff_name}</div>
-                          <div className="text-[10px] text-purple-700">{c.assigned_specialization}</div>
+                          <div className="font-semibold text-purple-300">{c.assigned_staff_name}</div>
+                          <div className="text-[10px] text-slate-400">{c.assigned_specialization}</div>
                         </div>
                       ) : (
-                        <span className="text-slate-400 italic">Unassigned</span>
+                        <span className="text-slate-500 italic">Unassigned</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {c.status !== 'RESOLVED' && c.status !== 'CLOSED' && (
-                          <button
+                          <GlowButton
+                            variant="primary"
+                            size="sm"
                             onClick={() => setAssigningComplaint(c)}
-                            className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold text-[11px] shadow-sm transition-colors"
                           >
-                            {c.assigned_staff_name ? 'Reassign' : 'Assign'}
-                          </button>
+                            {c.assigned_staff_name ? 'Reassign' : 'Dispatch'}
+                          </GlowButton>
                         )}
-                        <Link
-                          href={`/complaints/${c.complaint_id}`}
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-colors"
-                        >
-                          View
+                        <Link href={`/complaints/${c.complaint_id}`}>
+                          <GlowButton variant="ghost" size="sm">
+                            Inspect
+                          </GlowButton>
                         </Link>
                       </div>
                     </td>
@@ -304,72 +323,81 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Dispatch Modal */}
-      {assigningComplaint && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                <UserCheck className="w-5 h-5 text-purple-600" /> Dispatch Maintenance Staff
-              </h3>
-              <button
-                onClick={() => setAssigningComplaint(null)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1">
-              <div className="font-bold text-slate-800">
-                Complaint #{assigningComplaint.complaint_id}: {assigningComplaint.title}
-              </div>
-              <div className="text-slate-500">
-                Department: {assigningComplaint.department_name} • Location: {assigningComplaint.building}, {assigningComplaint.room}
-              </div>
-            </div>
-
-            <form onSubmit={handleAssign} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                  Select Technician
-                </label>
-                <select
-                  required
-                  value={selectedStaffId}
-                  onChange={(e) => setSelectedStaffId(e.target.value)}
-                  className="w-full text-xs px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                >
-                  <option value="">Choose technician...</option>
-                  {staffList.map((s) => (
-                    <option key={s.staff_id} value={s.staff_id}>
-                      {s.full_name} — {s.specialization} ({s.availability_status})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
+      {/* Dispatch Modal (Animmaster Spring Backdrop) */}
+      <AnimatePresence>
+        {assigningComplaint && (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="glass-panel rounded-3xl max-w-md w-full p-6 shadow-2xl border border-white/10 space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <h3 className="font-bold text-white flex items-center gap-2">
+                  <UserCheck className="w-5 h-5 text-purple-400" />
+                  <span>Dispatch Maintenance Staff</span>
+                </h3>
                 <button
-                  type="button"
                   onClick={() => setAssigningComplaint(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                  className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={dispatching || !selectedStaffId}
-                  className="px-4 py-2 text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white rounded-xl shadow-md transition-colors disabled:opacity-50"
-                >
-                  {dispatching ? 'Dispatching...' : 'Confirm Assignment (fn_assign_complaint)'}
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </form>
+
+              <div className="bg-slate-900/80 p-3.5 rounded-2xl border border-white/5 text-xs space-y-1">
+                <div className="font-bold text-white">
+                  Ticket #{assigningComplaint.complaint_id}: {assigningComplaint.title}
+                </div>
+                <div className="text-slate-400">
+                  Dept: {assigningComplaint.department_name} · Location: {assigningComplaint.building}, {assigningComplaint.room}
+                </div>
+              </div>
+
+              <form onSubmit={handleAssign} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider">
+                    Select Available Technician
+                  </label>
+                  <select
+                    required
+                    value={selectedStaffId}
+                    onChange={(e) => setSelectedStaffId(e.target.value)}
+                    className="w-full text-xs px-3.5 py-2.5 bg-slate-900/90 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-400 transition-colors"
+                  >
+                    <option value="">Choose technician...</option>
+                    {staffList.map((s) => (
+                      <option key={s.staff_id} value={s.staff_id}>
+                        {s.full_name} — {s.specialization} ({s.availability_status})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex justify-end gap-2.5 pt-2">
+                  <GlowButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAssigningComplaint(null)}
+                  >
+                    Cancel
+                  </GlowButton>
+                  <GlowButton
+                    type="submit"
+                    variant="primary"
+                    size="sm"
+                    isLoading={dispatching}
+                  >
+                    {dispatching ? 'Dispatching...' : 'Confirm Dispatch (fn_assign_complaint)'}
+                  </GlowButton>
+                </div>
+              </form>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-

@@ -114,3 +114,11 @@ export interface StaffMetric {
   avg_task_turnaround_hours: number | null;
 }
 
+export interface AnalyticsSummary {
+  totalComplaints?: number;
+  openComplaints?: number;
+  inProgressComplaints?: number;
+  resolvedComplaints?: number;
+  slaComplianceRate?: number;
+}
+
