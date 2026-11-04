@@ -15,9 +15,11 @@ import {
   MapPin, 
   Menu, 
   X, 
-  User,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Layers,
+  Workflow,
+  Home
 } from 'lucide-react';
 import { Button } from './ui/Button';
 
@@ -70,22 +72,25 @@ export default function Navbar() {
     }
   };
 
-  const navLinks = [
-    ...(user?.roleName === 'STUDENT'
-      ? [{ href: '/dashboard/student', label: 'My Complaints' }]
-      : []),
-    ...(user?.roleName === 'MAINTENANCE_STAFF'
-      ? [{ href: '/dashboard/staff', label: 'Work Orders' }]
-      : []),
-    ...(user?.roleName === 'ADMIN'
-      ? [{ href: '/dashboard/admin', label: 'Dispatch Center' }]
-      : []),
+  // Public & Authenticated Navigation links
+  const publicLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/#features', label: 'Features' },
+    { href: '/#how-it-works', label: 'How It Works' },
     { href: '/campus-map', label: 'Campus Map', icon: <MapPin className="w-3.5 h-3.5" /> },
-    { href: '/analytics', label: 'Analytics & Views', icon: <BarChart3 className="w-3.5 h-3.5" /> },
+    { href: '/analytics', label: 'Analytics', icon: <BarChart3 className="w-3.5 h-3.5" /> },
   ];
 
+  const roleDashboardLink = user?.roleName === 'ADMIN'
+    ? { href: '/dashboard/admin', label: 'Dispatch Center', icon: <Shield className="w-3.5 h-3.5" /> }
+    : user?.roleName === 'MAINTENANCE_STAFF'
+    ? { href: '/dashboard/staff', label: 'Work Orders', icon: <Wrench className="w-3.5 h-3.5" /> }
+    : user?.roleName === 'STUDENT'
+    ? { href: '/dashboard/student', label: 'My Complaints', icon: <GraduationCap className="w-3.5 h-3.5" /> }
+    : null;
+
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0e17]/85 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0e17]/90 backdrop-blur-md transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Brand identity */}
@@ -95,7 +100,7 @@ export default function Navbar() {
               <CheckCircle2 className="w-5 h-5 text-white" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-white tracking-tight group-hover:text-sky-300 transition-colors">
+              <span className="text-base font-bold text-white tracking-tight group-hover:text-brand-300 transition-colors">
                 CampusFix
               </span>
               <span className="text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded">
@@ -104,13 +109,27 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => {
+            {roleDashboardLink && (
+              <Link
+                href={roleDashboardLink.href}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold mr-1 transition-all ${
+                  pathname === roleDashboardLink.href
+                    ? 'bg-brand-500/20 text-brand-300 border border-brand-500/30'
+                    : 'text-brand-400 hover:bg-brand-500/10'
+                }`}
+              >
+                {roleDashboardLink.icon}
+                <span>{roleDashboardLink.label}</span>
+              </Link>
+            )}
+
+            {publicLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
-                  key={link.href}
+                  key={link.label}
                   href={link.href}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     isActive
@@ -126,7 +145,7 @@ export default function Navbar() {
           </nav>
         </div>
 
-        {/* User / Authentication actions */}
+        {/* User / Authentication Actions */}
         <div className="flex items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3">
@@ -163,7 +182,7 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* Mobile hamburger */}
+          {/* Mobile menu trigger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
@@ -174,7 +193,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile drawer */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -183,9 +202,23 @@ export default function Navbar() {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden border-b border-white/10 bg-[#0a0e17] px-4 py-3 space-y-1"
           >
-            {navLinks.map((link) => (
+            {roleDashboardLink && (
               <Link
-                key={link.href}
+                href={roleDashboardLink.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-3 py-2 rounded-lg text-xs bg-brand-500/15 text-brand-300 font-semibold mb-2"
+              >
+                <div className="flex items-center gap-2">
+                  {roleDashboardLink.icon}
+                  <span>{roleDashboardLink.label}</span>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-brand-400" />
+              </Link>
+            )}
+
+            {publicLinks.map((link) => (
+              <Link
+                key={link.label}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs ${
