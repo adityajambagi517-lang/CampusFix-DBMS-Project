@@ -26,11 +26,10 @@ export async function PATCH(
         [complaintId, user.staffId, remarks || 'Marked resolved by technician']
       );
     } else {
-      // Standard status transition (Trigger trg_complaint_status_history handles recording)
+      // Standard status transition (Trigger trg_complaint_status_history and trg_set_resolved_at handle recording & timestamps)
       await query(
         `UPDATE complaint 
-         SET status = $1,
-             resolved_at = CASE WHEN $1 IN ('RESOLVED', 'CLOSED') THEN CURRENT_TIMESTAMP ELSE resolved_at END
+         SET status = $1::complaint_status
          WHERE complaint_id = $2`,
         [status, complaintId]
       );

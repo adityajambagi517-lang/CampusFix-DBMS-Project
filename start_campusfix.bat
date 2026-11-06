@@ -22,3 +22,4 @@ echo.
 
 npm run start
 pause
+
