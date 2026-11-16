@@ -236,7 +236,7 @@ export default function AdminDashboard() {
                   <th className="py-3 px-4">Priority</th>
                   <th className="py-3 px-4">SLA Deadline</th>
                   <th className="py-3 px-4">Assigned Technician</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 text-right">Assign / Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -288,8 +288,10 @@ export default function AdminDashboard() {
                             variant="primary"
                             size="sm"
                             onClick={() => setAssigningComplaint(c)}
+                            className="bg-brand-600 hover:bg-brand-500 text-white font-semibold flex items-center gap-1.5 shadow-md shadow-brand-500/20"
                           >
-                            {c.assigned_staff_name ? 'Reassign' : 'Dispatch'}
+                            <UserCheck className="w-3.5 h-3.5" />
+                            <span>{c.assigned_staff_name ? 'Reassign' : 'Assign Staff'}</span>
                           </Button>
                         )}
                         <Link href={`/complaints/${c.complaint_id}`}>
