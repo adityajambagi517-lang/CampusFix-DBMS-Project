@@ -1,0 +1,8 @@
+complaint_id,student_name,email,title,status,priority,created_at
+7,aditya,adityajambagi51@gmail.com,fan is not working,OPEN,MEDIUM,2026-11-16 13:36:05.568996+05:30
+6,Aditya Jambagi,aditya.student@campusfix.edu,the light is not working,ASSIGNED,MEDIUM,2026-11-05 10:40:43.667663+05:30
+5,Priya Sharma,priya.student@campusfix.edu,Lab 302 fan is vibrating violently and about to stop,ASSIGNED,HIGH,2026-11-04 12:44:17.571601+05:30
+4,Dr. Ramesh Rao (HOD CS),dr.ramesh@campusfix.edu,Wooden desk leg broken with sharp nails exposed,RESOLVED,MEDIUM,2026-11-03 09:14:17.570022+05:30
+3,Rahul Verma,rahul.student@campusfix.edu,Continuous water leakage from main pipeline in 3rd floor washroom,IN_PROGRESS,CRITICAL,2026-11-04 08:14:17.56848+05:30
+2,Priya Sharma,priya.student@campusfix.edu,Wi-Fi router drops connection constantly in Lecture Hall 201,ASSIGNED,HIGH,2026-11-04 10:14:17.566542+05:30
+1,Aditya Jambagi,aditya.student@campusfix.edu,Ceiling fan making loud grinding noise and running very slow,OPEN,MEDIUM,2026-11-04 11:14:17.535596+05:30
